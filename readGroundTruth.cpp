@@ -82,9 +82,9 @@ void readGroundTruth(const char* filename, const vector<flow_t_>& points, vector
 	unsigned int index = 0;
 	for (vector<flow_t_>::const_iterator iter = points.begin();
 			iter != points.end(); ++iter) {
-		index = ((*iter).pos.y - 1) * width + (*iter).pos.x - 1; // add -1 because data stream starts at pos 0
-		val.pos.x = (*iter).pos.x;
-		val.pos.y = (*iter).pos.y;
+		index = (*iter).pos.y * width + (*iter).pos.x; // corrected indexing into one line stream
+		val.pos.x = (*iter).pos.x; //col
+		val.pos.y = (*iter).pos.y; //row
 		val.flow_x = full_gt_flow_x.at(index); //horizontal flow
 		val.flow_y = full_gt_flow_y.at(index); //vertical flow
 		gtFlow.push_back(val);

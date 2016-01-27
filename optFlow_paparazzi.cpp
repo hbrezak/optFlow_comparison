@@ -54,8 +54,10 @@ void optFlow_paparazzi(char* curImagePath, char* nextImagePath, char* groundTrut
 	int index = -1;
 	for (vector<Point2f>::const_iterator iter = currPoints.begin(); iter!=currPoints.end(); iter++){
 		index++;
-		corners[index].x = iter->x;
-		corners[index].y = iter->y;
+		corners[index].x = iter->x; // column
+		corners[index].y = iter->y; // row
+		// in paparazzi, y iterates over height, x over width -> y are rows, x are cols
+		// rows and cols are 0-based
 	}
 
 	uint16_t numTracked = (sizeof(corners)/sizeof(*corners));
@@ -84,6 +86,9 @@ void optFlow_paparazzi(char* curImagePath, char* nextImagePath, char* groundTrut
 		var.flow_x = float(vectors[i].flow_x) / subpixel_factor;
 		var.flow_y = float(vectors[i].flow_y) / subpixel_factor;
 		lk_flow.push_back(var);
+		//cout << float(vectors[i].pos.y) / subpixel_factor << " " << float(vectors[i].pos.x) / subpixel_factor << endl;
+		//cout << var.flow_y << " " << var.flow_x << endl;
+
 	}
 
 	calcErrorMetrics(groundTruthPath, lk_flow, results.angErr, results.magErr);

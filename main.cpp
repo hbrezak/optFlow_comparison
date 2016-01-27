@@ -34,11 +34,11 @@ int main()
 {
 	//Enter the path for images
 	char firstImg[] =
-			"/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSet2/frame10.png";
+			"/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSet1/frame10.png";
 	char secondImg[] =
-			"/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSet2/frame11.png";
+			"/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSet1/frame11.png";
 	char ground_truth_file[] =
-			"/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSet2/ground_truth.flo";
+			"/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSet1/ground_truth.flo";
 
 	//Find good features to track
 	//Initalize some constants and parameters
@@ -57,7 +57,7 @@ int main()
 	cout << "Points for both algorithms" << endl;
 	cout << "size : " << currPoints.size() << endl;
 	for (unsigned int i = 0; i != currPoints.size(); i++)
-		cout << currPoints[i].y << "   " << currPoints[i].x << endl;
+		cout << currPoints[i].x << "   " << currPoints[i].y << endl;
 */
 
 	flowResults dataOpencv, dataPaparazzi, dataOpencvPyr;
@@ -67,6 +67,9 @@ int main()
 	optFlow_paparazzi(firstImg, secondImg, ground_truth_file, currPoints, dataPaparazzi);
 
 	optFlow_opencv(firstImg, secondImg, ground_truth_file, currPoints, pyrLevel, dataOpencvPyr);
+
+
+	cout << endl; cout << endl;
 
 	cout << "Paparazzi results: " << endl;
 	cout << "Average angular error: " << dataPaparazzi.angErr << endl;

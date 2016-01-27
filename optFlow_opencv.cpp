@@ -31,7 +31,6 @@ void optFlow_opencv(char* curImagePath, char* nextImagePath, char* groundTruthPa
 	vector<float> err;
 
 
-
 	//Read images into openCV Mat image container, automatically convert to gray
 	Mat currFrame, nextFrame;
 	currFrame = imread(curImagePath,	IMREAD_GRAYSCALE);
@@ -49,13 +48,12 @@ void optFlow_opencv(char* curImagePath, char* nextImagePath, char* groundTruthPa
 	results.time = time;
 
 
-
-
-
 	vector<flow_t_> lk_flow;
 	flow_t_ var;
 	//DEBUG Output current feature locations and next feature locations
 	//cout << "Format: row -- column" << endl;
+
+	cout << currPoints.size() << endl;
 	for (vector<Point2f>::size_type i = 0; i!= currPoints.size(); i++){
 		//cout << currPoints[i].y << "--" << currPoints[i].x << "        " << nextPoints[i].y << "--" << nextPoints[i].x << endl;
 		var.pos.x = currPoints[i].x;
@@ -63,12 +61,15 @@ void optFlow_opencv(char* curImagePath, char* nextImagePath, char* groundTruthPa
 		var.flow_x = nextPoints[i].x - currPoints[i].x;
 		var.flow_y = nextPoints[i].y - currPoints[i].y;
 		lk_flow.push_back(var);
+		cout << var.flow_x << " " << var.flow_y << endl;
 	}
 
 	calcErrorMetrics(groundTruthPath, lk_flow, results.angErr, results.magErr);
 
 	results.flow_viz = showFlow(currFrame, nextFrame, curImagePath, lk_flow);
 }
+
+
 /* C++: void calcOpticalFlowPyrLK(InputArray prevImg, InputArray nextImg, InputArray prevPts, InputOutputArray nextPts,
  * 									OutputArray status, OutputArray err, Size winSize=Size(21,21), int maxLevel=3,
  * 									TermCriteria criteria=TermCriteria(TermCriteria::COUNT+TermCriteria::EPS, 30, 0.01),
