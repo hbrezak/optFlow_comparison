@@ -34,15 +34,17 @@ int main()
 {
 	//Enter the path for images
 	char firstImg[] =
-			"/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSet1/frame10.png";
+			"/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSetMario/icon_mario1.png";
 	char secondImg[] =
-			"/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSet1/frame11.png";
+			"/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSetMario/icon_mario2.png";
 	char ground_truth_file[] =
-			"/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSet1/ground_truth.flo";
+			"/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSetMario/mario_flow_2.flo";
+
+
 
 	//Find good features to track
 	//Initalize some constants and parameters
-	const int MAX_FEATURES = 500;
+	const int MAX_FEATURES = 150;
 	int pyrLevel = 2;	 // max value is 3; 0 == pyramids not used(1 lvl), 1 == 2 levels used
 	Mat curFrame = imread(firstImg, IMREAD_GRAYSCALE);
 	vector<Point2f> currPoints; //typedef Point_<float> Point2f;
@@ -53,54 +55,51 @@ int main()
 
 	//Refine good features location - finds subpixels feature location
 	//cornerSubPix(currFrame, currPoints, subPixWinSize, Size(-1,-1), termcrit);
-/*
-	cout << "Points for both algorithms" << endl;
+
+	cout << "Points for both algorithms (column -- row)" << endl;
 	cout << "size : " << currPoints.size() << endl;
 	for (unsigned int i = 0; i != currPoints.size(); i++)
 		cout << currPoints[i].x << "   " << currPoints[i].y << endl;
-*/
+
 
 	flowResults dataOpencv, dataPaparazzi, dataOpencvPyr;
 
-	optFlow_opencv(firstImg, secondImg, ground_truth_file, currPoints, 0, dataOpencv);
+
 
 	optFlow_paparazzi(firstImg, secondImg, ground_truth_file, currPoints, dataPaparazzi);
+	optFlow_opencv(firstImg, secondImg, ground_truth_file, currPoints, 0, dataOpencv);
 
-	optFlow_opencv(firstImg, secondImg, ground_truth_file, currPoints, pyrLevel, dataOpencvPyr);
+	//optFlow_opencv(firstImg, secondImg, ground_truth_file, currPoints, pyrLevel, dataOpencvPyr);
 
 
 	cout << endl; cout << endl;
 
 	cout << "Paparazzi results: " << endl;
-	cout << "Average angular error: " << dataPaparazzi.angErr << endl;
 	cout << "Average magnitude error: " << dataPaparazzi.magErr <<endl;
+	cout << "Average angular error: " << dataPaparazzi.angErr << endl;
 	cout << "Time passed in miliseconds: " << dataPaparazzi.time << endl;
 
 	cout << endl; cout << endl;
 
 	cout << "OpenCV results: " << endl;
-	cout << "Average angular error: " << dataOpencv.angErr << endl;
 	cout << "Average magnitude error: " << dataOpencv.magErr << endl;
+	cout << "Average angular error: " << dataOpencv.angErr << endl;
 	cout << "Time passed in miliseconds: " << dataOpencv.time << endl;
 
-	cout << endl; cout << endl;
+	/*cout << endl; cout << endl;
 
 	cout << "OpenCV with pyramids results: " << endl;
-	cout << "Average angular error: " << dataOpencvPyr.angErr << endl;
 	cout << "Average magnitude error: " << dataOpencvPyr.magErr << endl;
-	cout << "Time passed in miliseconds: " << dataOpencvPyr.time << endl;
-
-
-
-
+	cout << "Average angular error: " << dataOpencvPyr.angErr << endl;
+	cout << "Time passed in miliseconds: " << dataOpencvPyr.time << endl;*/
 
 
 	namedWindow("Paparazzi optical flow", WINDOW_AUTOSIZE);
 	namedWindow("OpenCV optical flow", WINDOW_AUTOSIZE);
-	namedWindow("OpenCV with pyramids optical flow", WINDOW_AUTOSIZE);
+	//namedWindow("OpenCV with pyramids optical flow", WINDOW_AUTOSIZE);
 	imshow("Paparazzi optical flow", dataPaparazzi.flow_viz);
 	imshow("OpenCV optical flow", dataOpencv.flow_viz);
-	imshow("OpenCV with pyramids optical flow", dataOpencvPyr.flow_viz);
+	//imshow("OpenCV with pyramids optical flow", dataOpencvPyr.flow_viz);
 	waitKey();
 
 	return 0;

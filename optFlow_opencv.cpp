@@ -53,17 +53,36 @@ void optFlow_opencv(char* curImagePath, char* nextImagePath, char* groundTruthPa
 	//DEBUG Output current feature locations and next feature locations
 	//cout << "Format: row -- column" << endl;
 
-	cout << currPoints.size() << endl;
+
+	/*cout << endl;
+	cout << "OpenCV tracked points(column -- row) " << endl;
+	cout << "Total number of points: "<< currPoints.size() << endl;*/
 	for (vector<Point2f>::size_type i = 0; i!= currPoints.size(); i++){
 		//cout << currPoints[i].y << "--" << currPoints[i].x << "        " << nextPoints[i].y << "--" << nextPoints[i].x << endl;
+		//if (err[i] < 1){ // comment out this if command if you want whole output. this uses errors that calcLK provides to
+			//get rid of high error results
 		var.pos.x = currPoints[i].x;
 		var.pos.y = currPoints[i].y;
 		var.flow_x = nextPoints[i].x - currPoints[i].x;
 		var.flow_y = nextPoints[i].y - currPoints[i].y;
-		lk_flow.push_back(var);
-		cout << var.flow_x << " " << var.flow_y << endl;
-	}
-
+		lk_flow.push_back(var);}
+		//cout << var.pos.x << " " << var.pos.y << endl;
+	//}
+/*	cout << endl;
+	cout << "OpenCV flow (hor_flow -- vert_flow)" << endl;
+	for (vector<flow_t_>::const_iterator it = lk_flow.begin(); it!=lk_flow.end(); it++)
+		cout << it->flow_x << " " << it->flow_y << endl;
+	cout << endl;*/
+	cout << endl;
+	cout << "opencv size" << lk_flow.size() << endl;
+/*
+	cout << endl;
+	cout << "OpenCV error" << endl;
+	for (vector<float>::const_iterator it = err.begin();
+			it != err.end(); it++)
+		cout << *it << endl;
+	cout << endl;
+*/
 	calcErrorMetrics(groundTruthPath, lk_flow, results.angErr, results.magErr);
 
 	results.flow_viz = showFlow(currFrame, nextFrame, curImagePath, lk_flow);

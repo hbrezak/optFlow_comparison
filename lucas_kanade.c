@@ -93,7 +93,7 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 
   // Calculate the amount of points to skip
   float skip_points = (points_orig > max_points) ? points_orig / max_points : 1;
-  //printf("\nBased on max_points input, I'm skipping %f points(1 == none). \n", skip_points); //ADDED
+  printf("\nBased on max_points input, I'm skipping %f points(1 == none). \n", skip_points); //ADDED
   //CONC : I don't want to skip any points and result of skip_points is then appropriate
 
   // Go through all points
@@ -103,16 +103,18 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
     // If the pixel is outside ROI, do not track it
     if (points[p].x < half_window_size || (old_img->w - points[p].x) < half_window_size
         || points[p].y < half_window_size || (old_img->h - points[p].y) < half_window_size) {
-    	//printf("Input feature outside ROI %u, %u \n", points[p].x, points[p].y); //ADDED
+    	printf("Input feature outside ROI %u, %u \n", points[p].x, points[p].y); //ADDED
     	//CONC: consistent in not tracking edge features
       continue;
     }
+
 
     // Convert the point to a subpixel coordinate
     vectors[new_p].pos.x = points[p].x * subpixel_factor;
     vectors[new_p].pos.y = points[p].y * subpixel_factor;
     vectors[new_p].flow_x = 0;
     vectors[new_p].flow_y = 0;
+    printf("Convert point to subpix: %u, %u \n", vectors[new_p].pos.x,  vectors[new_p].pos.y);
 
     // (1) determine the subpixel neighborhood in the old image
     image_subpixel_window(old_img, &window_I, &vectors[new_p].pos, subpixel_factor);
@@ -148,7 +150,7 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
       if (new_point.x / subpixel_factor < half_window_size || (old_img->w - new_point.x / subpixel_factor) < half_window_size
           || new_point.y / subpixel_factor < half_window_size || (old_img->h - new_point.y / subpixel_factor) < half_window_size) {
         tracked = FALSE;
-        //printf("*New point outside ROI %u, %u \n",new_point.x, new_point.y); //ADDED
+        printf("*New point outside ROI %u, %u \n",new_point.x, new_point.y); //ADDED
         break;
       }
 
@@ -159,7 +161,7 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
       uint32_t error = image_difference(&window_I, &window_J, &window_diff);
       if (error > error_threshold && it > max_iterations / 2) {
         tracked = FALSE;
-        //printf("*Error larger than error treshold for %d %d \n", points[p].x, points[p].y); //ADDED
+        printf("*Error larger than error treshold for %d %d \n", points[p].x, points[p].y); //ADDED
         break;
       }
 

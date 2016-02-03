@@ -27,6 +27,7 @@
 #include "image.h"
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h> //ADDED
 
 
 /**
@@ -252,8 +253,13 @@ void image_subpixel_window(struct image_t *input, struct image_t *output, struct
 
   // Calculate the window size
   uint16_t half_window = output->w / 2;
+
   uint16_t subpixel_w = input->w * subpixel_factor;
+
   uint16_t subpixel_h = input->h * subpixel_factor;
+  printf("mark2 : %lu,  %lu \n", input->h, subpixel_h);
+  //uint16 goes up to 65000. If width of 70 is multiplied with 100, we get 7000, it ok
+  //If 70 is multiplied by 1000 we get garbage (4464)
 
   // Go through the whole window size in normal coordinates
   for (uint16_t i = 0; i < output->w; i++) {

@@ -29,6 +29,7 @@ void optFlow_paparazzi(char* curImagePath, char* nextImagePath, char* groundTrut
 	Mat curImg = imread(curImagePath, CV_LOAD_IMAGE_COLOR);
 	Mat nextImg = imread(nextImagePath, CV_LOAD_IMAGE_COLOR);
 
+
 	image_t curYUV;
 	image_t nextYUV;
 	image_create(&curYUV, uint16_t (curImg.cols), uint16_t (curImg.rows), IMAGE_YUV422);
@@ -62,7 +63,7 @@ void optFlow_paparazzi(char* curImagePath, char* nextImagePath, char* groundTrut
 
 	uint16_t numTracked = (sizeof(corners)/sizeof(*corners));
 	uint16_t window_size = 10;
-	uint16_t subpixel_factor = 10;
+	uint16_t subpixel_factor = 100 ;
 	uint8_t max_iterations = 10;
 	uint8_t step_threshold = 2;
 	uint16_t max_track_corners = sizeof(corners)/sizeof(*corners);
@@ -72,12 +73,15 @@ void optFlow_paparazzi(char* curImagePath, char* nextImagePath, char* groundTrut
 	struct flow_t *vectors = opticFlowLK(&nextGray, &curGray, corners, &numTracked,
 	                                       window_size / 2, subpixel_factor, max_iterations,
 										   step_threshold, max_track_corners);
-	time = (((double)getTickCount() - time)/getTickFrequency())*1000;
+	time = (((double)getTickCount() - time)/getTickFrequency())*1000; //in miliseconds
 	results.time = time;
 
 	vector<flow_t_> lk_flow;
 	flow_t_ var;
 
+	cout << endl;
+	cout << "Paparazzi tracked points (column -- row)" << endl;
+	cout << "Total number of points: "<< numTracked << endl;
 	// Go through all the points
 	for (uint16_t i = 0; i < numTracked; i++) {
 		//because opticalFlowLK leaves out some corners
@@ -86,10 +90,15 @@ void optFlow_paparazzi(char* curImagePath, char* nextImagePath, char* groundTrut
 		var.flow_x = float(vectors[i].flow_x) / subpixel_factor;
 		var.flow_y = float(vectors[i].flow_y) / subpixel_factor;
 		lk_flow.push_back(var);
-		//cout << float(vectors[i].pos.y) / subpixel_factor << " " << float(vectors[i].pos.x) / subpixel_factor << endl;
-		//cout << var.flow_y << " " << var.flow_x << endl;
-
+		cout << var.pos.x << " " << var.pos.y << endl;
 	}
+
+	cout << endl;
+	cout << "Paparazzi flow (hor_flow -- vert_flow)" << endl;
+	for (vector<flow_t_>::const_iterator it = lk_flow.begin();
+			it != lk_flow.end(); it++)
+		cout << it->flow_x << " " << it->flow_y << endl;
+	cout << endl;
 
 	calcErrorMetrics(groundTruthPath, lk_flow, results.angErr, results.magErr);
 
