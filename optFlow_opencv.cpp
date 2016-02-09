@@ -68,21 +68,21 @@ void optFlow_opencv(char* curImagePath, char* nextImagePath, char* groundTruthPa
 		lk_flow.push_back(var);}
 		//cout << var.pos.x << " " << var.pos.y << endl;
 	//}
-/*	cout << endl;
+	cout << endl;
 	cout << "OpenCV flow (hor_flow -- vert_flow)" << endl;
 	for (vector<flow_t_>::const_iterator it = lk_flow.begin(); it!=lk_flow.end(); it++)
 		cout << it->flow_x << " " << it->flow_y << endl;
-	cout << endl;*/
+	cout << endl;
 	cout << endl;
 	cout << "opencv size" << lk_flow.size() << endl;
-/*
+
 	cout << endl;
 	cout << "OpenCV error" << endl;
 	for (vector<float>::const_iterator it = err.begin();
 			it != err.end(); it++)
 		cout << *it << endl;
 	cout << endl;
-*/
+
 	calcErrorMetrics(groundTruthPath, lk_flow, results.angErr, results.magErr);
 
 	results.flow_viz = showFlow(currFrame, nextFrame, curImagePath, lk_flow);

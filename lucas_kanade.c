@@ -81,6 +81,7 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
   // determine patch sizes and initialize neighborhoods
   uint16_t patch_size = 2 * half_window_size;
   uint32_t error_threshold = (25 * 25) *(patch_size *patch_size);
+  printf("Point removal error threshold: %u \n", error_threshold);
   uint16_t padded_patch_size = patch_size + 2;
 
   // Create the window images
@@ -114,7 +115,7 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
     vectors[new_p].pos.y = points[p].y * subpixel_factor;
     vectors[new_p].flow_x = 0;
     vectors[new_p].flow_y = 0;
-    printf("Convert point to subpix: %u, %u \n", vectors[new_p].pos.x,  vectors[new_p].pos.y);
+    //printf("Convert point to subpix: %u, %u \n", vectors[new_p].pos.x,  vectors[new_p].pos.y);
 
     // (1) determine the subpixel neighborhood in the old image
     image_subpixel_window(old_img, &window_I, &vectors[new_p].pos, subpixel_factor);
@@ -138,7 +139,7 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
     // a * (Ax - Bx) + (1-a) * (Ax+1 - Bx+1)
     // a * Ax - a * Bx + (1-a) * Ax+1 - (1-a) * Bx+1
     // (a * Ax + (1-a) * Ax+1)  - (a * Bx + (1-a) * Bx+1)
-
+    uint32_t remember_error = 0; //ADDED
     // (4) iterate over taking steps in the image to minimize the error:
     bool_t tracked = TRUE;
     for (uint8_t it = 0; it < max_iterations; it++) {
@@ -161,9 +162,11 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
       uint32_t error = image_difference(&window_I, &window_J, &window_diff);
       if (error > error_threshold && it > max_iterations / 2) {
         tracked = FALSE;
-        printf("*Error larger than error treshold for %d %d \n", points[p].x, points[p].y); //ADDED
+        //printf("*Error %u larger than error treshold for %d %d \n",error, points[p].x, points[p].y); //ADDED
+        printf("%u \n", error);
         break;
       }
+      remember_error = error;
 
       int32_t b_x = image_multiply(&window_diff, &window_DX, NULL) / 255;
       int32_t b_y = image_multiply(&window_diff, &window_DY, NULL) / 255;
@@ -180,10 +183,13 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
       }
     }
 
+
     // If we tracked the point we update the index and the count
     if (tracked) {
       new_p++;
       (*points_cnt)++;
+      //printf("Valid point last error: %u , point: %d %d \n", remember_error,points[p].x, points[p].y);
+      printf("%u \n", remember_error);
     }
   }
 

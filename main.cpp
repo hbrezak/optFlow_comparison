@@ -34,18 +34,18 @@ int main()
 {
 	//Enter the path for images
 	char firstImg[] =
-			"/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSetMario/icon_mario1.png";
+			"/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSetMario/mario_first.png";
 	char secondImg[] =
-			"/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSetMario/icon_mario2.png";
+			"/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSetMario/mario_offset_4.png";
 	char ground_truth_file[] =
-			"/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSetMario/mario_flow_2.flo";
+			"/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSetMario/mario_flow_4.flo";
 
 
 
 	//Find good features to track
 	//Initalize some constants and parameters
 	const int MAX_FEATURES = 150;
-	int pyrLevel = 2;	 // max value is 3; 0 == pyramids not used(1 lvl), 1 == 2 levels used
+	//int pyrLevel = 2;	 // max value is 3; 0 == pyramids not used(1 lvl), 1 == 2 levels used
 	Mat curFrame = imread(firstImg, IMREAD_GRAYSCALE);
 	vector<Point2f> currPoints; //typedef Point_<float> Point2f;
 	//REMEMBER! currPoints.x == width == columns; currPoints.y == height == rows;

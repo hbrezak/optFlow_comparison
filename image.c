@@ -257,7 +257,7 @@ void image_subpixel_window(struct image_t *input, struct image_t *output, struct
   uint16_t subpixel_w = input->w * subpixel_factor;
 
   uint16_t subpixel_h = input->h * subpixel_factor;
-  printf("mark2 : %lu,  %lu \n", input->h, subpixel_h);
+
   //uint16 goes up to 65000. If width of 70 is multiplied with 100, we get 7000, it ok
   //If 70 is multiplied by 1000 we get garbage (4464)
 
@@ -364,6 +364,7 @@ void image_calculate_g(struct image_t *dx, struct image_t *dy, int32_t *g)
 uint32_t image_difference(struct image_t *img_a, struct image_t *img_b, struct image_t *diff)
 {
   uint32_t sum_diff2 = 0;
+  //float sum_diff = 0;
   int16_t *diff_buf = NULL;
 
   // Fetch the buffers in the correct format
@@ -380,6 +381,7 @@ uint32_t image_difference(struct image_t *img_a, struct image_t *img_b, struct i
     for (uint16_t y = 0; y < img_b->h; y++) {
       int16_t diff_c = img_a_buf[(y + 1) * img_a->w + (x + 1)] - img_b_buf[y * img_b->w + x];
       sum_diff2 += diff_c * diff_c;
+     // sum_diff += abs((float)diff_c);
 
       // Set the difference image
       if (diff_buf != NULL) {
@@ -387,6 +389,18 @@ uint32_t image_difference(struct image_t *img_a, struct image_t *img_b, struct i
       }
     }
   }
+  //Bouguet way, still let through (-3,3) pixels
+  //sum_diff2 = sqrt( sum_diff2 / (img_b->w * img_b->h -1));
+
+  //sum_diff2 = sum_diff * 1.f/(32*img_b->w * img_b->h);
+
+ /* errval += std::abs((float)diff);
+                 }
+             }
+             err[ptidx] = errval * 1.f/(32*winSize.width*cn*winSize.height);
+         }*/
+
+
 
   return sum_diff2;
 }
