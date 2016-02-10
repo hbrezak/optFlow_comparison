@@ -80,7 +80,7 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
   	  //new_p, points_cnt are related to number of points, wont overflow
 
   // determine patch sizes and initialize neighborhoods
-  uint16_t patch_size = 2 * half_window_size +1;
+  uint16_t patch_size = 2 * half_window_size +1; //CHANGED to put pixel in center, doesnt seem to impact results, keep in mind.
   //printf("patch size: %u", patch_size);
   uint32_t error_threshold = (25 * 25) *(patch_size *patch_size);
   uint16_t padded_patch_size = patch_size + 2;
@@ -121,7 +121,7 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 
     // (1) determine the subpixel neighborhood in the old image
     image_subpixel_window(old_img, &window_I, &vectors[new_p].pos, subpixel_factor);
-break;
+
     // (2) get the x- and y- gradients
     image_gradients(&window_I, &window_DX, &window_DY);
 

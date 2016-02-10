@@ -271,25 +271,30 @@ void image_subpixel_window(struct image_t *input, struct image_t *output, struct
       // Calculate the subpixel coordinate
       uint32_t x = center->x + (i - half_window) * subpixel_factor;
       uint32_t y = center->y + (j - half_window) * subpixel_factor; // sums 32bit ints, CHANGED 16 -> 32
-      printf("Calc. the subpixel coord. at %u %u for pixel %u %u - x %u  y %u \n", i, j,center->x,center->y, x, y);
+      //printf("Calc. the subpixel coord. at %u %u for pixel %u %u - x %u  y %u \n", i, j,center->x,center->y, x, y);
+      // after 16 -> 32, scanning through window works great
       BoundUpper(x, subpixel_w);
       BoundUpper(y, subpixel_h);
 
       // Calculate the original pixel coordinate
       uint16_t orig_x = x / subpixel_factor;
       uint16_t orig_y = y / subpixel_factor;
+      //printf("original pixel coord.: %u %u \n", orig_x, orig_y); // works
 
       // Calculate top left (in subpixel coordinates)
-      uint16_t tl_x = orig_x * subpixel_factor;
-      uint16_t tl_y = orig_y * subpixel_factor;
+      uint32_t tl_x = orig_x * subpixel_factor;
+      uint32_t tl_y = orig_y * subpixel_factor; //overflowing (is in subpixel*coord), CHANGED 16 -> 32; now works
+      //printf("top left pixel: %u %u \n", tl_x, tl_y);
 
       // Check if it is the top left pixel
       if (tl_x == x &&  tl_y == y) {
         output_buf[output->w * j + i] = input_buf[input->w * orig_y + orig_x];
+        //printf("if pixel top left (in 4 pixel bilin.interp.network) save value %u \n", input_buf[input->w * orig_y + orig_x]);
       } else {
         // Calculate the difference from the top left
         uint16_t alpha_x = (x - tl_x);
         uint16_t alpha_y = (y - tl_y);
+        //printf("alpha_x %u, alpha_y %u \n", alpha_x, alpha_y); // works (numbers below 1000);
 
         // Blend from the 4 surrounding pixels
         uint32_t blend = (subpixel_factor - alpha_x) * (subpixel_factor - alpha_y) * input_buf[input->w * orig_y + orig_x];
