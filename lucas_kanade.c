@@ -80,7 +80,7 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
   	  //new_p, points_cnt are related to number of points, wont overflow
 
   // determine patch sizes and initialize neighborhoods
-  uint16_t patch_size = 2 * half_window_size +1; //CHANGED to put pixel in center, doesnt seem to impact results, keep in mind.
+  uint16_t patch_size = 2 * half_window_size + 1; //CHANGED to put pixel in center, doesnt seem to impact results, keep in mind.
   //printf("patch size: %u", patch_size);
   uint32_t error_threshold = (25 * 25) *(patch_size *patch_size);
   uint16_t padded_patch_size = patch_size + 2;
@@ -130,7 +130,9 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
     image_calculate_g(&window_DX, &window_DY, G);
 
     // calculate G's determinant in subpixel units:
-    int32_t Det = (G[0] * G[3] - G[1] * G[2]) / subpixel_factor;
+    int32_t Det = (G[0] * G[3] - G[1] * G[2]) / subpixel_factor; // 1000 * 1000
+    //printf("Max umnozak za det: %d \n", G[0]*G[3]); // milijuni
+    //printf("Determinanta: %d \n", Det);
 
     // Check if the determinant is bigger than 1
     if (Det < 1) {
@@ -172,10 +174,12 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
       int32_t b_y = image_multiply(&window_diff, &window_DY, NULL) / 255;
 
       //     [d] calculate the additional flow step and possibly terminate the iteration
-      int16_t step_x = (G[3] * b_x - G[1] * b_y) / Det;
-      int16_t step_y = (G[0] * b_y - G[2] * b_x) / Det;
+      int32_t step_x = (G[3] * b_x - G[1] * b_y) / Det; //CHANGED 16 -> 32
+      int32_t step_y = (G[0] * b_y - G[2] * b_x) / Det; //CHANGED 16 -> 32
+      //printf("step x %d step y %d \n", step_x, step_y);
       vectors[new_p].flow_x += step_x;
       vectors[new_p].flow_y += step_y;
+      //printf("suma flow x %d  flow y %d \n",vectors[new_p].flow_x, vectors[new_p].flow_y);
 
       // Check if we exceeded the treshold
       if ((abs(step_x) + abs(step_y)) < step_threshold) {

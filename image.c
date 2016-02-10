@@ -301,9 +301,11 @@ void image_subpixel_window(struct image_t *input, struct image_t *output, struct
         blend += alpha_x * (subpixel_factor - alpha_y) * input_buf[input->w * orig_y + (orig_x + 1)];
         blend += (subpixel_factor - alpha_x) * alpha_y * input_buf[input->w * (orig_y + 1) + orig_x];
         blend += alpha_x * alpha_y * input_buf[input->w * (orig_y + 1) + (orig_x + 1)];
+        //printf("Blend: %u \n", blend); //not overflowing for s_f 1000 but on 100 million
 
         // Set the normalized pixel blend
         output_buf[output->w * j + i] = blend / (subpixel_factor * subpixel_factor);
+        //printf("output to I/J %u \n", blend / (subpixel_factor * subpixel_factor)); // values 0-255
       }
     }
   }
@@ -318,6 +320,8 @@ void image_subpixel_window(struct image_t *input, struct image_t *output, struct
  */
 void image_gradients(struct image_t *input, struct image_t *dx, struct image_t *dy)
 {
+	//image_gradients(&window_I, &window_DX, &window_DY);
+
   // Fetch the buffers in the correct format
   uint8_t *input_buf = (uint8_t *)input->buf;
   int16_t *dx_buf = (int16_t *)dx->buf;
@@ -328,6 +332,7 @@ void image_gradients(struct image_t *input, struct image_t *dx, struct image_t *
     for (uint16_t y = 1; y < input->h - 1; y++) {
       dx_buf[(y - 1)*dx->w + (x - 1)] = (int16_t)input_buf[y * input->w + x + 1] - (int16_t)input_buf[y * input->w + x - 1];
       dy_buf[(y - 1)*dy->w + (x - 1)] = (int16_t)input_buf[(y + 1) * input->w + x] - (int16_t)input_buf[(y - 1) * input->w + x];
+      //printf("DX value %d, DY value %d \n",dx_buf[(y - 1)*dx->w + (x - 1)], dy_buf[(y - 1)*dy->w + (x - 1)]); //values -510 - 510
     }
   }
 }
@@ -341,6 +346,7 @@ void image_gradients(struct image_t *input, struct image_t *dx, struct image_t *
  */
 void image_calculate_g(struct image_t *dx, struct image_t *dy, int32_t *g)
 {
+	//image_calculate_g(&window_DX, &window_DY, G);
   int32_t sum_dxx = 0, sum_dxy = 0, sum_dyy = 0;
 
   // Fetch the buffers in the correct format
@@ -355,9 +361,11 @@ void image_calculate_g(struct image_t *dx, struct image_t *dy, int32_t *g)
       sum_dyy += ((int32_t)dy_buf[y * dy->w + x] * dy_buf[y * dy->w + x]);
     }
   }
+  //printf("sum_dxx squared: %d \n", sum_dxx); // u razini 100 000
 
   // ouput the G vector
   g[0] = sum_dxx / 255;
+  //printf("prvi clan matrice G: %d \n", g[0]); // u razini tisuca
   g[1] = sum_dxy / 255;
   g[2] = g[1];
   g[3] = sum_dyy / 255;
@@ -373,6 +381,7 @@ void image_calculate_g(struct image_t *dx, struct image_t *dy, int32_t *g)
  */
 uint32_t image_difference(struct image_t *img_a, struct image_t *img_b, struct image_t *diff)
 {
+	//uint32_t error = image_difference(&window_I, &window_J, &window_diff);
   uint32_t sum_diff2 = 0;
   int16_t *diff_buf = NULL;
 
@@ -388,8 +397,9 @@ uint32_t image_difference(struct image_t *img_a, struct image_t *img_b, struct i
   // Go trough the imagge pixels and calculate the difference
   for (uint16_t x = 0; x < img_b->w; x++) {
     for (uint16_t y = 0; y < img_b->h; y++) {
-      int16_t diff_c = img_a_buf[(y + 1) * img_a->w + (x + 1)] - img_b_buf[y * img_b->w + x];
-      sum_diff2 += diff_c * diff_c;
+      int16_t diff_c = img_a_buf[(y + 1) * img_a->w + (x + 1)] - img_b_buf[y * img_b->w + x]; //oduzima 2 vrijednosti <-510 - 510 >
+      sum_diff2 += diff_c * diff_c; // za s_f 1000 max vrijednost 500*500*15*15 < 100 mil
+
 
       // Set the difference image
       if (diff_buf != NULL) {
@@ -397,7 +407,7 @@ uint32_t image_difference(struct image_t *img_a, struct image_t *img_b, struct i
       }
     }
   }
-
+  //printf("Suma razlika %u \n", sum_diff2); //ne overflowa za s_f 1000
   return sum_diff2;
 }
 
@@ -411,6 +421,7 @@ uint32_t image_difference(struct image_t *img_a, struct image_t *img_b, struct i
  */
 int32_t image_multiply(struct image_t *img_a, struct image_t *img_b, struct image_t *mult)
 {
+	//int32_t b_x = image_multiply(&window_diff, &window_DX, NULL) / 255;
   int32_t sum = 0;
   int16_t *img_a_buf = (int16_t *)img_a->buf;
   int16_t *img_b_buf = (int16_t *)img_b->buf;
@@ -425,7 +436,9 @@ int32_t image_multiply(struct image_t *img_a, struct image_t *img_b, struct imag
   for (uint16_t x = 0; x < img_a->w; x++) {
     for (uint16_t y = 0; y < img_a->h; y++) {
       int16_t mult_c = img_a_buf[y * img_a->w + x] * img_b_buf[y * img_b->w + x];
+      //printf("mult_c: %d \n", mult_c); // vrijednosti do 30k, bi li se moglo pogoditi da overflow-a?
       sum += mult_c;
+      //printf("SUma: %d \n", sum); // nejde preko milijuna
 
       // Set the difference image
       if (mult_buf != NULL) {
