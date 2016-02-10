@@ -44,6 +44,7 @@ void image_create(struct image_t *img, uint16_t width, uint16_t height, enum ima
   img->w = width;
   img->h = height;
 
+
   // Depending on the type the size differs
   if (type == IMAGE_YUV422) {
     img->buf_size = sizeof(uint8_t) * 2 * width * height;
@@ -248,25 +249,29 @@ void image_yuv422_downsample(struct image_t *input, struct image_t *output, uint
  */
 void image_subpixel_window(struct image_t *input, struct image_t *output, struct point_t *center, uint16_t subpixel_factor)
 {
-  uint8_t *input_buf = (uint8_t *)input->buf;
+	// first call: image_subpixel_window(old_img, &window_I, &vectors[new_p].pos, subpixel_factor);
+
+  uint8_t *input_buf = (uint8_t *)input->buf; //contains original gray image values in range 0-255
   uint8_t *output_buf = (uint8_t *)output->buf;
 
   // Calculate the window size
-  uint16_t half_window = output->w / 2;
+  uint16_t half_window = output->w / 2; // window_size / 2 (= 6 for win size 12)
 
-  uint16_t subpixel_w = input->w * subpixel_factor;
+  uint32_t subpixel_w = input->w * subpixel_factor;
+  uint32_t subpixel_h = input->h * subpixel_factor; //window sizes overflow for s_f = 1000; CHANGED 16 -> 32
 
-  uint16_t subpixel_h = input->h * subpixel_factor;
-  //printf("mark2 : %lu,  %lu \n", input->h, subpixel_h);
+  //printf("Win size %u %u turned to %u %u for subpixel calc. \n", input->w, input->h, subpixel_w, subpixel_h);
   //uint16 goes up to 65000. If width of 70 is multiplied with 100, we get 7000, it ok
   //If 70 is multiplied by 1000 we get garbage (4464)
 
+  //printf("size of output J: %u %u \n", output->w, output->h);
   // Go through the whole window size in normal coordinates
   for (uint16_t i = 0; i < output->w; i++) {
     for (uint16_t j = 0; j < output->h; j++) {
       // Calculate the subpixel coordinate
-      uint16_t x = center->x + (i - half_window) * subpixel_factor;
-      uint16_t y = center->y + (j - half_window) * subpixel_factor;
+      uint32_t x = center->x + (i - half_window) * subpixel_factor;
+      uint32_t y = center->y + (j - half_window) * subpixel_factor; // sums 32bit ints, CHANGED 16 -> 32
+      printf("Calc. the subpixel coord. at %u %u for pixel %u %u - x %u  y %u \n", i, j,center->x,center->y, x, y);
       BoundUpper(x, subpixel_w);
       BoundUpper(y, subpixel_h);
 
