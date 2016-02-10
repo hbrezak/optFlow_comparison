@@ -435,8 +435,9 @@ int32_t image_multiply(struct image_t *img_a, struct image_t *img_b, struct imag
   // Calculate the multiplication
   for (uint16_t x = 0; x < img_a->w; x++) {
     for (uint16_t y = 0; y < img_a->h; y++) {
-      int16_t mult_c = img_a_buf[y * img_a->w + x] * img_b_buf[y * img_b->w + x];
+      int32_t mult_c = img_a_buf[y * img_a->w + x] * img_b_buf[y * img_b->w + x];
       //printf("mult_c: %d \n", mult_c); // vrijednosti do 30k, bi li se moglo pogoditi da overflow-a?
+      // ovo je bio uzrok velikih gresaka zbog kojih se broj tocaka smanjio s 52 na 44, CHANGED 16 -> 32
       sum += mult_c;
       //printf("SUma: %d \n", sum); // nejde preko milijuna
 
