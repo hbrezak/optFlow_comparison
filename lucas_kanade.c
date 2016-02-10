@@ -77,11 +77,13 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
   uint16_t new_p = 0;
   uint16_t points_orig = *points_cnt;
   *points_cnt = 0;
+  	  //new_p, points_cnt are related to number of points, wont overflow
 
   // determine patch sizes and initialize neighborhoods
   uint16_t patch_size = 2 * half_window_size;
   uint32_t error_threshold = (25 * 25) *(patch_size *patch_size);
   uint16_t padded_patch_size = patch_size + 2;
+  // 3 values related to tracking window size, wont overflow
 
   // Create the window images
   struct image_t window_I, window_J, window_DX, window_DY, window_diff;
@@ -110,11 +112,11 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 
 
     // Convert the point to a subpixel coordinate
-    vectors[new_p].pos.x = points[p].x * subpixel_factor;
-    vectors[new_p].pos.y = points[p].y * subpixel_factor;
+    vectors[new_p].pos.x = points[p].x * subpixel_factor; //this overflows for s_f = 1000; change point_t pos
+    vectors[new_p].pos.y = points[p].y * subpixel_factor; //this overflows for s_f = 1000; change point_t pos
     vectors[new_p].flow_x = 0;
     vectors[new_p].flow_y = 0;
-    printf("Convert point to subpix: %u, %u \n", vectors[new_p].pos.x,  vectors[new_p].pos.y);
+    //printf("Convert point %u %u to subpix: %u, %u \n", points[p].x, points[p].y, vectors[new_p].pos.x,  vectors[new_p].pos.y);
 
     // (1) determine the subpixel neighborhood in the old image
     image_subpixel_window(old_img, &window_I, &vectors[new_p].pos, subpixel_factor);

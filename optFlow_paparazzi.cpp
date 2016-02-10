@@ -62,10 +62,10 @@ void optFlow_paparazzi(char* curImagePath, char* nextImagePath, char* groundTrut
 	}
 
 	uint16_t numTracked = (sizeof(corners)/sizeof(*corners));
-	uint16_t window_size = 10;
-	uint16_t subpixel_factor = 100 ;
-	uint8_t max_iterations = 10;
-	uint8_t step_threshold = 2;
+	uint16_t window_size = 12;
+	uint16_t subpixel_factor = 1000;
+	uint8_t max_iterations = 30;
+	uint8_t step_threshold = 0.03;
 	uint16_t max_track_corners = sizeof(corners)/sizeof(*corners);
 
 
