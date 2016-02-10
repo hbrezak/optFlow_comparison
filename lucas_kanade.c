@@ -60,7 +60,7 @@
  * @return The vectors from the original *points in subpixels
  */
 struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, struct point_t *points, uint16_t *points_cnt,
-                           uint16_t half_window_size, uint16_t subpixel_factor, uint8_t max_iterations, uint8_t step_threshold, uint16_t max_points) {
+                           uint16_t half_window_size, uint32_t subpixel_factor, uint8_t max_iterations, uint8_t step_threshold, uint16_t max_points) {
   // A straightforward one-level implementation of Lucas-Kanade.
   // For all points:
   // (1) determine the subpixel neighborhood in the old image
@@ -80,7 +80,7 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
   	  //new_p, points_cnt are related to number of points, wont overflow
 
   // determine patch sizes and initialize neighborhoods
-  uint16_t patch_size = 2 * half_window_size + 1; //CHANGED to put pixel in center, doesnt seem to impact results, keep in mind.
+  uint16_t patch_size = 2 * half_window_size +1; //CHANGED to put pixel in center, doesnt seem to impact results, keep in mind.
   //printf("patch size: %u", patch_size);
   uint32_t error_threshold = (25 * 25) *(patch_size *patch_size);
   uint16_t padded_patch_size = patch_size + 2;
@@ -96,7 +96,7 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 
   // Calculate the amount of points to skip
   float skip_points = (points_orig > max_points) ? points_orig / max_points : 1;
-  printf("\nBased on max_points input, I'm skipping %f points(1 == none). \n", skip_points); //ADDED
+  //printf("\nBased on max_points input, I'm skipping %f points(1 == none). \n", skip_points); //ADDED
   //CONC : I don't want to skip any points and result of skip_points is then appropriate
 
   // Go through all points

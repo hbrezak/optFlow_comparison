@@ -297,11 +297,23 @@ void image_subpixel_window(struct image_t *input, struct image_t *output, struct
         //printf("alpha_x %u, alpha_y %u \n", alpha_x, alpha_y); // works (numbers below 1000);
 
         // Blend from the 4 surrounding pixels
-        uint32_t blend = (subpixel_factor - alpha_x) * (subpixel_factor - alpha_y) * input_buf[input->w * orig_y + orig_x];
-        blend += alpha_x * (subpixel_factor - alpha_y) * input_buf[input->w * orig_y + (orig_x + 1)];
-        blend += (subpixel_factor - alpha_x) * alpha_y * input_buf[input->w * (orig_y + 1) + orig_x];
-        blend += alpha_x * alpha_y * input_buf[input->w * (orig_y + 1) + (orig_x + 1)];
-        //printf("Blend: %u \n", blend); //not overflowing for s_f 1000 but on 100 million
+        uint64_t blend = (uint64_t)(subpixel_factor - alpha_x) * (subpixel_factor - alpha_y) * input_buf[input->w * orig_y + orig_x];
+        //printf("*Blend 1: %lu \n", blend);
+        blend += (uint64_t)alpha_x * (subpixel_factor - alpha_y) * input_buf[input->w * orig_y + (orig_x + 1)];
+        //printf("**Blend 2: %lu \n", blend);
+        blend += (uint64_t)(subpixel_factor - alpha_x) * alpha_y * input_buf[input->w * (orig_y + 1) + orig_x];
+        //printf("***Blend 3: %lu \n", blend);
+        blend += (uint64_t)alpha_x * alpha_y * input_buf[input->w * (orig_y + 1) + (orig_x + 1)]; // this casting fixed blend overflow
+       //printf("****Blend 4: %lu \n", blend);
+
+        /*printf("first row: %u, %u %u \n", (subpixel_factor - alpha_x), (subpixel_factor - alpha_y), input_buf[input->w * orig_y + orig_x]);
+        printf("second row: %u, %u %u \n", alpha_x, (subpixel_factor - alpha_y), input_buf[input->w * orig_y + (orig_x + 1)]);
+        printf("third row: %u, %u %u \n", (subpixel_factor - alpha_x), alpha_y, input_buf[input->w * (orig_y + 1) + orig_x]);
+        printf("forth row: %u, %u %u \n", alpha_x, alpha_y, input_buf[input->w * (orig_y + 1) + (orig_x + 1)]);
+*/
+
+
+        //printf("Blend: %lu \n", blend); //not overflowing for s_f 1000 but on 100 million
 
         // Set the normalized pixel blend
         output_buf[output->w * j + i] = blend / (subpixel_factor * subpixel_factor);
