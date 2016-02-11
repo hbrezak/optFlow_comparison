@@ -63,8 +63,8 @@ void optFlow_paparazzi(char* curImagePath, char* nextImagePath, char* groundTrut
 
 	uint16_t numTracked = (sizeof(corners)/sizeof(*corners));
 	uint16_t window_size = 31; // za ovu 31 vrijednost rezultati fantasticni
-	uint32_t subpixel_factor = 100000; //changed 16 -> 32 here, lucas_kanade.c, lucas_kanade.h; also all functions that use subpixel_factor: image subpixel window,
-	uint8_t max_iterations = 100;
+	uint32_t subpixel_factor = 10000; //changed 16 -> 32 here, lucas_kanade.c, lucas_kanade.h; also all functions that use subpixel_factor: image subpixel window,
+	uint8_t max_iterations = 40;
 	uint8_t step_threshold = 0.03;
 	uint16_t max_track_corners = sizeof(corners)/sizeof(*corners);
 

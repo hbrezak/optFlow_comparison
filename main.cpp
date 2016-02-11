@@ -34,11 +34,11 @@ int main()
 {
 	//Enter the path for images
 	char firstImg[] =
-			"/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSetMario/mario_first.png";
+			"/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSet6/frame10.png";
 	char secondImg[] =
-			"/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSetMario/mario_offset_4.png";
+			"/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSet6/frame11.png";
 	char ground_truth_file[] =
-			"/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSetMario/mario_flow_4.flo";
+			"/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSet6/ground_truth.flo";
 
 
 
