@@ -68,6 +68,14 @@ void optFlow_paparazzi(char* curImagePath, char* nextImagePath, char* groundTrut
 	uint8_t step_threshold = 0.03;
 	uint16_t max_track_corners = sizeof(corners)/sizeof(*corners);
 
+	/* good settings:
+		 * uint16_t window_size = 31; // za ovu 31 vrijednost rezultati fantasticni
+		 * 	uint32_t subpixel_factor = 10000;
+		 * 	uint8_t max_iterations = 40;
+		 * 	uint8_t step_threshold = 0.03;
+	*/
+
+
 
 	double time = (double)getTickCount();
 	struct flow_t *vectors = opticFlowLK(&nextGray, &curGray, corners, &numTracked,
