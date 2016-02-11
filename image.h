@@ -71,7 +71,7 @@ void image_switch(struct image_t *a, struct image_t *b);
 void image_to_grayscale(struct image_t *input, struct image_t *output);
 uint16_t image_yuv422_colorfilt(struct image_t *input, struct image_t *output, uint8_t y_m, uint8_t y_M, uint8_t u_m, uint8_t u_M, uint8_t v_m, uint8_t v_M);
 void image_yuv422_downsample(struct image_t *input, struct image_t *output, uint16_t downsample);
-void image_subpixel_window(struct image_t *input, struct image_t *output, struct point_t *center, uint16_t subpixel_factor);
+void image_subpixel_window(struct image_t *input, struct image_t *output, struct point_t *center, uint32_t subpixel_factor);
 void image_gradients(struct image_t *input, struct image_t *dx, struct image_t *dy);
 void image_calculate_g(struct image_t *dx, struct image_t *dy, int32_t *g);
 uint32_t image_difference(struct image_t *img_a, struct image_t *img_b, struct image_t *diff);

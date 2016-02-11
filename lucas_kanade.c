@@ -130,13 +130,13 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
     image_calculate_g(&window_DX, &window_DY, G);
 
     // calculate G's determinant in subpixel units:
-    int32_t Det = (G[0] * G[3] - G[1] * G[2]) / subpixel_factor; // 1000 * 1000
+    int32_t Det = ((int64_t)G[0] * G[3] - G[1] * G[2]) / subpixel_factor; // 1000 * 1000
     //printf("Max umnozak za det: %d \n", G[0]*G[3]); // milijuni
     //printf("Determinanta: %d \n", Det);
 
     // Check if the determinant is bigger than 1
     if (Det < 1) {
-    	//printf("Determinant smaller than 1 for %d %d \n", points[p].x, points[p].y); //ADDED
+    	printf("Determinant smaller than 1 for %d %d \n", points[p].x, points[p].y); //ADDED
       continue;
     }
 
@@ -165,7 +165,7 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
       //     [b] determine the image difference between the two neighborhoods
       uint32_t error = image_difference(&window_I, &window_J, &window_diff);
       if (error > error_threshold && it > max_iterations / 2) {
-        tracked = FALSE;
+        //tracked = FALSE;
         printf("*Error larger than error treshold for %d %d \n", points[p].x, points[p].y); //ADDED
         break;
       }

@@ -247,7 +247,7 @@ void image_yuv422_downsample(struct image_t *input, struct image_t *output, uint
  * @param[in] *center Center point in subpixel coordinates
  * @param[in] subpixel_factor The subpixel factor per pixel
  */
-void image_subpixel_window(struct image_t *input, struct image_t *output, struct point_t *center, uint16_t subpixel_factor)
+void image_subpixel_window(struct image_t *input, struct image_t *output, struct point_t *center, uint32_t subpixel_factor)
 {
 	// first call: image_subpixel_window(old_img, &window_I, &vectors[new_p].pos, subpixel_factor);
 
@@ -257,8 +257,8 @@ void image_subpixel_window(struct image_t *input, struct image_t *output, struct
   // Calculate the window size
   uint16_t half_window = output->w / 2; // window_size / 2 (= 6 for win size 12)
 
-  uint32_t subpixel_w = input->w * subpixel_factor;
-  uint32_t subpixel_h = input->h * subpixel_factor; //window sizes overflow for s_f = 1000; CHANGED 16 -> 32
+  uint32_t subpixel_w = (uint32_t)input->w * subpixel_factor;
+  uint32_t subpixel_h = (uint32_t)input->h * subpixel_factor; //window sizes overflow for s_f = 1000; CHANGED 16 -> 32
 
   //printf("Win size %u %u turned to %u %u for subpixel calc. \n", input->w, input->h, subpixel_w, subpixel_h);
   //uint16 goes up to 65000. If width of 70 is multiplied with 100, we get 7000, it ok
@@ -292,22 +292,22 @@ void image_subpixel_window(struct image_t *input, struct image_t *output, struct
         //printf("if pixel top left (in 4 pixel bilin.interp.network) save value %u \n", input_buf[input->w * orig_y + orig_x]);
       } else {
         // Calculate the difference from the top left
-        uint16_t alpha_x = (x - tl_x);
-        uint16_t alpha_y = (y - tl_y);
+        uint32_t alpha_x = (x - tl_x);
+        uint32_t alpha_y = (y - tl_y); // CHANGED for (100 000) 16 -> 32
         //printf("alpha_x %u, alpha_y %u \n", alpha_x, alpha_y); // works (numbers below 1000);
 
         // Blend from the 4 surrounding pixels
         uint64_t blend = (uint64_t)(subpixel_factor - alpha_x) * (subpixel_factor - alpha_y) * input_buf[input->w * orig_y + orig_x];
-        //printf("*Blend 1: %lu \n", blend);
+       // printf("*Blend 1: %lu \n", blend);
         blend += (uint64_t)alpha_x * (subpixel_factor - alpha_y) * input_buf[input->w * orig_y + (orig_x + 1)];
-        //printf("**Blend 2: %lu \n", blend);
+       // printf("**Blend 2: %lu \n", blend);
         blend += (uint64_t)(subpixel_factor - alpha_x) * alpha_y * input_buf[input->w * (orig_y + 1) + orig_x];
         //printf("***Blend 3: %lu \n", blend);
         blend += (uint64_t)alpha_x * alpha_y * input_buf[input->w * (orig_y + 1) + (orig_x + 1)]; // this casting fixed blend overflow
-       //printf("****Blend 4: %lu \n", blend);
+      // printf("****Blend 4: %lu \n", blend);
 
-        /*printf("first row: %u, %u %u \n", (subpixel_factor - alpha_x), (subpixel_factor - alpha_y), input_buf[input->w * orig_y + orig_x]);
-        printf("second row: %u, %u %u \n", alpha_x, (subpixel_factor - alpha_y), input_buf[input->w * orig_y + (orig_x + 1)]);
+        //printf("first row: %u, %u %u \n", (subpixel_factor - alpha_x), (subpixel_factor - alpha_y), input_buf[input->w * orig_y + orig_x]);
+       /* printf("second row: %u, %u %u \n", alpha_x, (subpixel_factor - alpha_y), input_buf[input->w * orig_y + (orig_x + 1)]);
         printf("third row: %u, %u %u \n", (subpixel_factor - alpha_x), alpha_y, input_buf[input->w * (orig_y + 1) + orig_x]);
         printf("forth row: %u, %u %u \n", alpha_x, alpha_y, input_buf[input->w * (orig_y + 1) + (orig_x + 1)]);
 */
@@ -316,8 +316,8 @@ void image_subpixel_window(struct image_t *input, struct image_t *output, struct
         //printf("Blend: %lu \n", blend); //not overflowing for s_f 1000 but on 100 million
 
         // Set the normalized pixel blend
-        output_buf[output->w * j + i] = blend / (subpixel_factor * subpixel_factor);
-        //printf("output to I/J %u \n", blend / (subpixel_factor * subpixel_factor)); // values 0-255
+        output_buf[output->w * j + i] = blend / ((uint64_t)subpixel_factor * subpixel_factor);
+        //printf("output to I/J %lu \n", blend / ((uint64_t)subpixel_factor * subpixel_factor)); // values 0-255
       }
     }
   }
@@ -420,6 +420,7 @@ uint32_t image_difference(struct image_t *img_a, struct image_t *img_b, struct i
     }
   }
   //printf("Suma razlika %u \n", sum_diff2); //ne overflowa za s_f 1000
+
   return sum_diff2;
 }
 
