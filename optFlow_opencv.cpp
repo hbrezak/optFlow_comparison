@@ -31,6 +31,7 @@ void optFlow_opencv(char* curImagePath, char* nextImagePath, char* groundTruthPa
 	vector<float> err;
 
 
+
 	//Read images into openCV Mat image container, automatically convert to gray
 	Mat currFrame, nextFrame;
 	currFrame = imread(curImagePath,	IMREAD_GRAYSCALE);
