@@ -64,6 +64,7 @@ struct flow_t {
 };
 
 /* Usefull image functions */
+void pad_image(struct image_t *input, struct image_t *output, uint8_t half_window);
 void image_create(struct image_t *img, uint16_t width, uint16_t height, enum image_type type);
 void image_free(struct image_t *img);
 void image_copy(struct image_t *input, struct image_t *output);

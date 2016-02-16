@@ -247,6 +247,42 @@ void image_yuv422_downsample(struct image_t *input, struct image_t *output, uint
  * @param[in] *center Center point in subpixel coordinates
  * @param[in] subpixel_factor The subpixel factor per pixel
  */
+
+void pad_image(struct image_t *input, struct image_t *output, uint8_t half_window)
+{
+	uint8_t *input_buf = (uint8_t *)input->buf;
+
+	output->h = input->h + 2*half_window;
+	output->w = input->w + 2*half_window;
+	output->buf_size = sizeof(uint8_t) * output->h * output->w;
+	free(output->buf);
+	output->buf = malloc(output->buf_size);
+	uint8_t *output_buf = (uint8_t*)output->buf;
+
+	for (int i = half_window; i != (output->h-half_window); i++){
+
+		for (int j=0; j!=half_window; j++)
+			output_buf[i*output->w + (half_window -1 - j)] = input_buf[(i-half_window)*input->w + j];
+
+		for (int j=half_window; j!=output->w-half_window;j++)
+			output_buf[i*output->w + j] = input_buf[(i-half_window)*input->w + (j - half_window)];
+
+		for (int j=0; j!=half_window;j++)
+			output_buf[i*output->w + output->w - half_window + j] = output_buf[i*output->w + output->w - half_window -1 - j];
+	}
+
+	for (int i=0; i!=half_window; i++){
+		memcpy(&output_buf[(half_window-1)*output->w - i*output->w], &output_buf[half_window*output->w + i*output->w], sizeof(uint8_t)*output->w);
+		memcpy(&output_buf[(output->h - half_window)*output->w + i*output->w], &output_buf[(output->h-half_window-1)*output->w - i*output->w], sizeof(uint8_t)*output->w);
+
+	}
+
+
+
+
+
+}
+
 void image_subpixel_window(struct image_t *input, struct image_t *output, struct point_t *center, uint32_t subpixel_factor)
 {
 	// first call: image_subpixel_window(old_img, &window_I, &vectors[new_p].pos, subpixel_factor);

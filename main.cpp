@@ -26,6 +26,7 @@
 #include "optFlow_opencv.h"
 #include "optFlow_paparazzi.h"
 
+
 using namespace cv;
 using namespace std;
 
@@ -56,25 +57,25 @@ int main()
 	//Refine good features location - finds subpixels feature location
 	//cornerSubPix(currFrame, currPoints, subPixWinSize, Size(-1,-1), termcrit);
 
-	cout << "Points for both algorithms (column -- row)" << endl;
+	/*cout << "Points for both algorithms (column -- row)" << endl;
 	cout << "size : " << currPoints.size() << endl;
 	for (unsigned int i = 0; i != currPoints.size(); i++)
 		cout << currPoints[i].x << "   " << currPoints[i].y << endl;
-
+*/
 
 	flowResults dataOpencv, dataPaparazzi, dataOpencvPyr;
 
 
 
 	optFlow_paparazzi(firstImg, secondImg, ground_truth_file, currPoints, dataPaparazzi);
-	optFlow_opencv(firstImg, secondImg, ground_truth_file, currPoints, 0, dataOpencv);
+	//optFlow_opencv(firstImg, secondImg, ground_truth_file, currPoints, 0, dataOpencv);
 
 	//optFlow_opencv(firstImg, secondImg, ground_truth_file, currPoints, pyrLevel, dataOpencvPyr);
 
 
 	cout << endl; cout << endl;
 
-	cout << "Paparazzi results: " << endl;
+	/*cout << "Paparazzi results: " << endl;
 	cout << "Average magnitude error: " << dataPaparazzi.magErr <<endl;
 	cout << "Average angular error: " << dataPaparazzi.angErr << endl;
 	cout << "Time passed in miliseconds: " << dataPaparazzi.time << endl;
@@ -84,7 +85,7 @@ int main()
 	cout << "OpenCV results: " << endl;
 	cout << "Average magnitude error: " << dataOpencv.magErr << endl;
 	cout << "Average angular error: " << dataOpencv.angErr << endl;
-	cout << "Time passed in miliseconds: " << dataOpencv.time << endl;
+	cout << "Time passed in miliseconds: " << dataOpencv.time << endl;*/
 
 	/*cout << endl; cout << endl;
 
@@ -94,13 +95,15 @@ int main()
 	cout << "Time passed in miliseconds: " << dataOpencvPyr.time << endl;*/
 
 
-	namedWindow("Paparazzi optical flow", WINDOW_AUTOSIZE);
+	/*namedWindow("Paparazzi optical flow", WINDOW_AUTOSIZE);
 	namedWindow("OpenCV optical flow", WINDOW_AUTOSIZE);
 	//namedWindow("OpenCV with pyramids optical flow", WINDOW_AUTOSIZE);
 	imshow("Paparazzi optical flow", dataPaparazzi.flow_viz);
 	imshow("OpenCV optical flow", dataOpencv.flow_viz);
 	//imshow("OpenCV with pyramids optical flow", dataOpencvPyr.flow_viz);
-	waitKey();
+	waitKey();*/
+
+
 
 	return 0;
 }
