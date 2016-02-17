@@ -116,10 +116,10 @@ void optFlow_paparazzi(char* curImagePath, char* nextImagePath, char* groundTrut
 
 
 	image_t test;
-	image_create(&test, 5, 5, IMAGE_YUV422);
+	image_create(&test, 4, 4, IMAGE_YUV422);
 	struct image_t *ref = &test;
 	uint8_t* buf = (uint8_t*)ref->buf;
-	char data[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13 ,14 ,15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25};
+	char data[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13 ,14 ,15, 16};//, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31 ,32 ,33,34,35,36};
 	for(int i=0; (*buf++ = *(data+i)); i++);
 	uint8_t *buff_pointer = (uint8_t*)ref->buf;
 
@@ -131,8 +131,8 @@ void optFlow_paparazzi(char* curImagePath, char* nextImagePath, char* groundTrut
 	}
 
 	image_t result;
-	image_create(&result, 1, 1, IMAGE_YUV422);
-	pad_image(&test, &result, 3);
+
+	pad_image(&test, &result, 2);
 
 	ref = &result;
 	buff_pointer = (uint8_t*)ref->buf;
@@ -143,6 +143,21 @@ void optFlow_paparazzi(char* curImagePath, char* nextImagePath, char* groundTrut
 			if (!((i+1)%ref->w))
 				printf("\n");
 	}
+
+	image_t pyr;
+	image_create(&pyr, (test.w+1)/2, (test.h+1)/2, IMAGE_YUV422);
+	build_pyramids(&result, &pyr, 2);
+
+	ref = &pyr;
+	buff_pointer = (uint8_t*)ref->buf;
+
+	cout << "calculated pyramid: " << endl;
+	for (unsigned int i = 0; i!=(ref->w * ref->h); ++i){
+			printf("%4d ", *buff_pointer++);
+			if (!((i+1)%ref->w))
+				printf("\n");
+	}
+
 
 
 

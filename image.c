@@ -239,6 +239,85 @@ void image_yuv422_downsample(struct image_t *input, struct image_t *output, uint
 }
 
 /**
+ * This adds padding to input image by mirroring the edge image elements.
+ * @param[in]  *input  - input image (grayscale only)
+ * @param[out] *output - the output image
+ * @param[in]  expand  - amount of padding needed (expand input image for this amount in all directions)
+ */
+void pad_image(struct image_t *input, struct image_t *output, uint8_t expand)
+{
+	image_create(output, input->w + 2 * expand, input->h + 2 * expand, input->type);
+
+	uint8_t *input_buf = (uint8_t *)input->buf;
+	uint8_t *output_buf = (uint8_t *)output->buf;
+
+	// Skip first `expand` rows, iterate through next input->h rows
+	for (uint16_t i = expand; i != (output->h - expand); i++){
+
+		// Mirror first `expand` columns
+		for (uint8_t j = 0; j != expand; j++)
+			output_buf[i * output->w + (expand - 1 - j)] = input_buf[(i - expand) * input->w + j];
+
+		// Copy corresponding row values from input image
+		memcpy(&output_buf[i * output->w + expand], &input_buf[(i - expand) * input->w], sizeof(uint8_t) * input->w);
+
+		// Mirror last `expand` columns
+		for (uint8_t j = 0; j != expand; j++)
+			output_buf[i * output->w + output->w - expand + j] = output_buf[i * output->w + output->w - expand -1 - j];
+	}
+
+	// Mirror first `expand` and last `expand` rows
+	for (uint8_t i = 0; i != expand; i++){
+		memcpy(&output_buf[(expand - 1) * output->w - i * output->w], &output_buf[expand * output->w + i * output->w], sizeof(uint8_t) * output->w);
+		memcpy(&output_buf[(output->h - expand) * output->w + i * output->w], &output_buf[(output->h - expand - 1) * output->w - i * output->w], sizeof(uint8_t) * output->w);
+	}
+}
+
+void build_pyramids(struct image_t *input, struct image_t *output, uint8_t half_wind)
+{
+	uint8_t *input_buf = (uint8_t *)input->buf;
+	uint8_t *output_buf = (uint8_t *)output->buf;
+
+	uint16_t row, col; // coordinates of the pixel being calculated in input matrix
+	uint16_t w = input->w;
+	float sum = 0;
+
+	for (uint16_t i = 0; i != output->h; i++){
+
+		for (uint16_t j = 0; j != output->w; j++){
+			row = 2 + 2 * i;
+			col = 2 + 2 * j;
+			/*output_buf[i*output->w + j] = round(0.0039*input_buf[(2+2*i -2)*input->w + (2+2*j -2)] + 1.0/64*input_buf[(2+2*i -2)*input->w + (2+2*j -1)] +
+					3.0/128*input_buf[(2+2*i -2)*input->w + (2+2*j)] + 1.0/64*input_buf[(2+2*i -2)*input->w + (2+2*j +1)] + 0.0039*input_buf[(2+2*i -2)*input->w + (2+2*j +2)] +
+					1.0/64*input_buf[(2+2*i -1)*input->w + (2+2*j -2)] + 1.0/16*input_buf[(2+2*i -1)*input->w + (2+2*j -1)] + 3.0/32*input_buf[(2+2*i -1)*input->w + (2+2*j)] +
+					1.0/16*input_buf[(2+2*i -1)*input->w + (2+2*j +1)] + 1.0/64*input_buf[(2+2*i -1)*input->w + (2+2*j +2)] + 3.0/128*input_buf[(2+2*i)*input->w + (2+2*j -2)] +
+					3.0/32*input_buf[(2+2*i)*input->w + (2+2*j -1)] + 9.0/64*input_buf[(2+2*i)*input->w + (2+2*j)] + 3.0/32*input_buf[(2+2*i)*input->w + (2+2*j +1)] +
+					3.0/128*input_buf[(2+2*i)*input->w + (2+2*j +2)] + 1.0/64*input_buf[(2+2*i +1)*input->w + (2+2*j -2)] + 1.0/16*input_buf[(2+2*i +1)*input->w + (2+2*j -1)] +
+					3.0/32*input_buf[(2+2*i +1)*input->w + (2+2*j)] +1.0/16*input_buf[(2+2*i +1)*input->w + (2+2*j +1)] + 1.0/64*input_buf[(2+2*i +1)*input->w + (2+2*j +2)] +
+					0.0039*input_buf[(2+2*i +2)*input->w + (2+2*j -2)] + 1.0/64*input_buf[(2+2*i +2)*input->w + (2+2*j -1)] + 3.0/128*input_buf[(2+2*i +2)*input->w + (2+2*j)] +
+					1.0/64*input_buf[(2+2*i +2)*input->w + (2+2*j +1)] + 0.0039*input_buf[(2+2*i +2)*input->w + (2+2*j +2)]);*/
+
+			sum =  0.0039*input_buf[(row -2)*w + (col -2)] + 0.0156*input_buf[(row -2)*w + (col -1)] + 0.0234*input_buf[(row -2)*w + (col)];
+			sum += 0.0156*input_buf[(row -2)*w + (col +1)] + 0.0039*input_buf[(row -2)*w + (col +2)] + 0.0156*input_buf[(row -1)*w + (col -2)];
+			sum += 0.0625*input_buf[(row -1)*w + (col -1)] + 0.0938*input_buf[(row -1)*w + (col)]    + 0.0625*input_buf[(row -1)*w + (col +1)];
+			sum += 0.0156*input_buf[(row -1)*w + (col +2)] + 0.0234*input_buf[(row)*w    + (col -2)] + 0.0938*input_buf[(row)*w    + (col -1)];
+			sum += 0.1406*input_buf[(row)*w    + (col)]    + 0.0938*input_buf[(row)*w    + (col +1)] + 0.0234*input_buf[(row)*w    + (col +2)];
+			sum += 0.0156*input_buf[(row +1)*w + (col -2)] + 0.0625*input_buf[(row +1)*w + (col -1)] + 0.0938*input_buf[(row +1)*w + (col)];
+			sum += 0.0625*input_buf[(row +1)*w + (col +1)] + 0.0156*input_buf[(row +1)*w + (col +2)] + 0.0039*input_buf[(row +2)*w + (col -2)];
+			sum += 0.0156*input_buf[(row +2)*w + (col -1)] + 0.0234*input_buf[(row +2)*w + (col)]    + 0.0156*input_buf[(row +2)*w + (col +1)];
+			sum += 0.0039*input_buf[(row +2)*w + (col +2)];
+
+			output_buf[i*output->w + j] = round(sum);
+		}
+	}
+}
+
+
+
+
+
+
+/**
  * This outputs a subpixel window image in grayscale
  * Currently only works with Grayscale images as input but could be upgraded to
  * also support YUV422 images.
@@ -247,41 +326,6 @@ void image_yuv422_downsample(struct image_t *input, struct image_t *output, uint
  * @param[in] *center Center point in subpixel coordinates
  * @param[in] subpixel_factor The subpixel factor per pixel
  */
-
-void pad_image(struct image_t *input, struct image_t *output, uint8_t half_window)
-{
-	uint8_t *input_buf = (uint8_t *)input->buf;
-
-	output->h = input->h + 2*half_window;
-	output->w = input->w + 2*half_window;
-	output->buf_size = sizeof(uint8_t) * output->h * output->w;
-	free(output->buf);
-	output->buf = malloc(output->buf_size);
-	uint8_t *output_buf = (uint8_t*)output->buf;
-
-	for (int i = half_window; i != (output->h-half_window); i++){
-
-		for (int j=0; j!=half_window; j++)
-			output_buf[i*output->w + (half_window -1 - j)] = input_buf[(i-half_window)*input->w + j];
-
-		for (int j=half_window; j!=output->w-half_window;j++)
-			output_buf[i*output->w + j] = input_buf[(i-half_window)*input->w + (j - half_window)];
-
-		for (int j=0; j!=half_window;j++)
-			output_buf[i*output->w + output->w - half_window + j] = output_buf[i*output->w + output->w - half_window -1 - j];
-	}
-
-	for (int i=0; i!=half_window; i++){
-		memcpy(&output_buf[(half_window-1)*output->w - i*output->w], &output_buf[half_window*output->w + i*output->w], sizeof(uint8_t)*output->w);
-		memcpy(&output_buf[(output->h - half_window)*output->w + i*output->w], &output_buf[(output->h-half_window-1)*output->w - i*output->w], sizeof(uint8_t)*output->w);
-
-	}
-
-
-
-
-
-}
 
 void image_subpixel_window(struct image_t *input, struct image_t *output, struct point_t *center, uint32_t subpixel_factor)
 {
