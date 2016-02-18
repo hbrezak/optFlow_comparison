@@ -80,7 +80,7 @@ void image_free(struct image_t *img)
 void image_copy(struct image_t *input, struct image_t *output)
 {
   if (input->type != output->type) {
-    return;
+	  return;
   }
 
   output->w = input->w;
@@ -88,6 +88,7 @@ void image_copy(struct image_t *input, struct image_t *output)
   output->buf_size = input->buf_size;
   memcpy(&output->ts, &input->ts, sizeof(struct timeval));
   memcpy(output->buf, input->buf, input->buf_size);
+
 }
 
 /**
@@ -239,12 +240,12 @@ void image_yuv422_downsample(struct image_t *input, struct image_t *output, uint
 }
 
 /**
- * This adds padding to input image by mirroring the edge image elements.
+ * This function adds padding to input image by mirroring the edge image elements.
  * @param[in]  *input  - input image (grayscale only)
  * @param[out] *output - the output image
  * @param[in]  expand  - amount of padding needed (expand input image for this amount in all directions)
  */
-void pad_image(struct image_t *input, struct image_t *output, uint8_t expand)
+void image_add_padding(struct image_t *input, struct image_t *output, uint8_t expand)
 {
 	image_create(output, input->w + 2 * expand, input->h + 2 * expand, input->type);
 
@@ -273,13 +274,23 @@ void pad_image(struct image_t *input, struct image_t *output, uint8_t expand)
 	}
 }
 
-void build_pyramids(struct image_t *input, struct image_t *output, uint8_t half_wind)
+/**
+ * This function calculates and outputs next level of pyramid based on input.
+ * For calculating new pixel value 5x5 filter matrix suggested by Bouguet is used.
+ * @param[in]  *input  - input image (grayscale only)
+ * @param[out] *output - the output image
+ */
+void pyramid_next_level(struct image_t *input, struct image_t *output)
 {
-	uint8_t *input_buf = (uint8_t *)input->buf;
+	struct image_t padded;
+	image_add_padding(input, &padded, 2);
+	image_create(output, (input->w+1)/2, (input->h+1)/2, input->type);
+
+	uint8_t *padded_buf = (uint8_t *)padded.buf;
 	uint8_t *output_buf = (uint8_t *)output->buf;
 
-	uint16_t row, col; // coordinates of the pixel being calculated in input matrix
-	uint16_t w = input->w;
+	uint16_t row, col; // coordinates of the central pixel; pixel being calculated in input matrix; center of filer matrix
+	uint16_t w = padded.w;
 	float sum = 0;
 
 	for (uint16_t i = 0; i != output->h; i++){
@@ -297,15 +308,15 @@ void build_pyramids(struct image_t *input, struct image_t *output, uint8_t half_
 					0.0039*input_buf[(2+2*i +2)*input->w + (2+2*j -2)] + 1.0/64*input_buf[(2+2*i +2)*input->w + (2+2*j -1)] + 3.0/128*input_buf[(2+2*i +2)*input->w + (2+2*j)] +
 					1.0/64*input_buf[(2+2*i +2)*input->w + (2+2*j +1)] + 0.0039*input_buf[(2+2*i +2)*input->w + (2+2*j +2)]);*/
 
-			sum =  0.0039*input_buf[(row -2)*w + (col -2)] + 0.0156*input_buf[(row -2)*w + (col -1)] + 0.0234*input_buf[(row -2)*w + (col)];
-			sum += 0.0156*input_buf[(row -2)*w + (col +1)] + 0.0039*input_buf[(row -2)*w + (col +2)] + 0.0156*input_buf[(row -1)*w + (col -2)];
-			sum += 0.0625*input_buf[(row -1)*w + (col -1)] + 0.0938*input_buf[(row -1)*w + (col)]    + 0.0625*input_buf[(row -1)*w + (col +1)];
-			sum += 0.0156*input_buf[(row -1)*w + (col +2)] + 0.0234*input_buf[(row)*w    + (col -2)] + 0.0938*input_buf[(row)*w    + (col -1)];
-			sum += 0.1406*input_buf[(row)*w    + (col)]    + 0.0938*input_buf[(row)*w    + (col +1)] + 0.0234*input_buf[(row)*w    + (col +2)];
-			sum += 0.0156*input_buf[(row +1)*w + (col -2)] + 0.0625*input_buf[(row +1)*w + (col -1)] + 0.0938*input_buf[(row +1)*w + (col)];
-			sum += 0.0625*input_buf[(row +1)*w + (col +1)] + 0.0156*input_buf[(row +1)*w + (col +2)] + 0.0039*input_buf[(row +2)*w + (col -2)];
-			sum += 0.0156*input_buf[(row +2)*w + (col -1)] + 0.0234*input_buf[(row +2)*w + (col)]    + 0.0156*input_buf[(row +2)*w + (col +1)];
-			sum += 0.0039*input_buf[(row +2)*w + (col +2)];
+			sum =  0.0039*padded_buf[(row -2)*w + (col -2)] + 0.0156*padded_buf[(row -2)*w + (col -1)] + 0.0234*padded_buf[(row -2)*w + (col)];
+			sum += 0.0156*padded_buf[(row -2)*w + (col +1)] + 0.0039*padded_buf[(row -2)*w + (col +2)] + 0.0156*padded_buf[(row -1)*w + (col -2)];
+			sum += 0.0625*padded_buf[(row -1)*w + (col -1)] + 0.0938*padded_buf[(row -1)*w + (col)]    + 0.0625*padded_buf[(row -1)*w + (col +1)];
+			sum += 0.0156*padded_buf[(row -1)*w + (col +2)] + 0.0234*padded_buf[(row)*w    + (col -2)] + 0.0938*padded_buf[(row)*w    + (col -1)];
+			sum += 0.1406*padded_buf[(row)*w    + (col)]    + 0.0938*padded_buf[(row)*w    + (col +1)] + 0.0234*padded_buf[(row)*w    + (col +2)];
+			sum += 0.0156*padded_buf[(row +1)*w + (col -2)] + 0.0625*padded_buf[(row +1)*w + (col -1)] + 0.0938*padded_buf[(row +1)*w + (col)];
+			sum += 0.0625*padded_buf[(row +1)*w + (col +1)] + 0.0156*padded_buf[(row +1)*w + (col +2)] + 0.0039*padded_buf[(row +2)*w + (col -2)];
+			sum += 0.0156*padded_buf[(row +2)*w + (col -1)] + 0.0234*padded_buf[(row +2)*w + (col)]    + 0.0156*padded_buf[(row +2)*w + (col +1)];
+			sum += 0.0039*padded_buf[(row +2)*w + (col +2)];
 
 			output_buf[i*output->w + j] = round(sum);
 		}
@@ -313,6 +324,21 @@ void build_pyramids(struct image_t *input, struct image_t *output, uint8_t half_
 }
 
 
+/**
+ * This function populates given array of image_t structs with wanted number of pyramids based on given input.
+ * @param[in]  *input  - input image (grayscale only)
+ * @param[out] *output - array of image_t structs containing image pyiramid levels. Level zero contains original image,
+ *                       followed by `pyr_level` of pyramid.
+ */
+void pyramid_build(struct image_t *input, struct image_t *output_array, uint8_t pyr_level)
+{
+	image_create(&output_array[0], input->w, input->h, input->type);
+	image_copy(input, &output_array[0]);
+
+	for (uint8_t i = 1; i!=pyr_level + 1; i++)
+		pyramid_next_level(&output_array[i-1], &output_array[i]);
+
+}
 
 
 

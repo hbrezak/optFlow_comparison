@@ -64,8 +64,8 @@ struct flow_t {
 };
 
 /* Usefull image functions */
-void pad_image(struct image_t *input, struct image_t *output, uint8_t half_window);
-void build_pyramids(struct image_t *input, struct image_t *output, uint8_t half_wind);
+void image_add_padding(struct image_t *input, struct image_t *output, uint8_t half_window);
+
 void image_create(struct image_t *img, uint16_t width, uint16_t height, enum image_type type);
 void image_free(struct image_t *img);
 void image_copy(struct image_t *input, struct image_t *output);
@@ -81,5 +81,7 @@ int32_t image_multiply(struct image_t *img_a, struct image_t *img_b, struct imag
 void image_show_points(struct image_t *img, struct point_t *points, uint16_t points_cnt);
 void image_show_flow(struct image_t *img, struct flow_t *vectors, uint16_t points_cnt, uint8_t subpixel_factor);
 void image_draw_line(struct image_t *img, struct point_t *from, struct point_t *to);
+void pyramid_next_level(struct image_t *input, struct image_t *output);
+void pyramid_build(struct image_t *input, struct image_t *output_array, uint8_t pyr_level);
 
 #endif
