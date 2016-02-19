@@ -104,13 +104,15 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 	image_create(&window_DY, patch_size, patch_size, IMAGE_GRADIENT);
 	image_create(&window_diff, patch_size, patch_size, IMAGE_GRADIENT);
 
+	uint8_t exp = 1;
+	for (uint8_t k = 0; k != pyramid_level; k++)
+			exp *= 2;
+
 	for (int8_t LVL = pyramid_level; LVL != -1; LVL--) {
 
 		uint16_t points_orig = *points_cnt;
 		*points_cnt = 0;
 		//new_p, points_cnt are related to number of points, wont overflow
-		printf("Mark! \n");
-		printf("LEVEL: %u \n", LVL);
 
 		// Calculate the amount of points to skip
 		//float skip_points =	(points_orig > max_points) ? points_orig / max_points : 1;
@@ -124,7 +126,7 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 
 
 			if (LVL == pyramid_level){
-				printf("Mark2! %u \n", p);
+
 				// If the pixel is outside ROI, do not track it
 				if (points[p].x < half_window_size || (pyramid_old[LVL].w - points[p].x) < half_window_size	|| points[p].y < half_window_size
 						|| (pyramid_old[LVL].h - points[p].y) < half_window_size) {
@@ -134,13 +136,15 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 				}
 
 				// Convert the point to a subpixel coordinate
-				vectors[new_p].pos.x = points[p].x * subpixel_factor; //this overflows for s_f = 1000; change point_t pos
-				vectors[new_p].pos.y = points[p].y * subpixel_factor; //this overflows for s_f = 1000; change point_t pos
+				vectors[new_p].pos.x = (points[p].x * subpixel_factor) / exp; //this overflows for s_f = 1000; change point_t pos
+				vectors[new_p].pos.y = (points[p].y * subpixel_factor) / exp; //this overflows for s_f = 1000; change point_t pos
 				vectors[new_p].flow_x = 0;
 				vectors[new_p].flow_y = 0;
 				//printf("Convert point %u %u to subpix: %u, %u \n", points[p].x, points[p].y, vectors[new_p].pos.x,  vectors[new_p].pos.y);
 			} else {
 				// Convert last pyramid level flow into this pyramid level flow guess
+				vectors[new_p].pos.x = 2 * vectors[new_p].pos.x;
+				vectors[new_p].pos.y = 2 * vectors[new_p].pos.y;
 				vectors[new_p].flow_x = 2 * vectors[new_p].flow_x;
 				vectors[new_p].flow_y = 2 * vectors[new_p].flow_y;
 			}
@@ -169,7 +173,7 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 			// (4) iterate over taking steps in the image to minimize the error:
 			bool_t tracked = TRUE;
 			for (uint8_t it = 0; it < max_iterations; it++) {
-				struct point_t new_point = { vectors[new_p].pos.x + vectors[new_p].flow_x,
+				struct point_t new_point = { vectors[new_p].pos.x  + vectors[new_p].flow_x,
 											 vectors[new_p].pos.y + vectors[new_p].flow_y };
 				// If the pixel is outside ROI, do not track it
 				if (new_point.x / subpixel_factor < half_window_size || (pyramid_old[LVL].w - new_point.x / subpixel_factor) < half_window_size

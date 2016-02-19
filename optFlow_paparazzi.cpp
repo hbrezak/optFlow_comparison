@@ -80,7 +80,7 @@ void optFlow_paparazzi(char* curImagePath, char* nextImagePath, char* groundTrut
 	double time = (double)getTickCount();
 	struct flow_t *vectors = opticFlowLK(&nextGray, &curGray, corners, &numTracked,
 	                                       window_size / 2, subpixel_factor, max_iterations,
-										   step_threshold, max_track_corners, 0);
+										   step_threshold, max_track_corners, 2);
 	time = (((double)getTickCount() - time)/getTickFrequency())*1000; //in miliseconds
 	results.time = time;
 

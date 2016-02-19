@@ -35,11 +35,11 @@ int main()
 {
 	//Enter the path for images
 	char firstImg[] =
-			"/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSetMario/mario_first.png";
+			"/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSet6/frame10.png";
 	char secondImg[] =
-			"/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSetMario/mario_offset_2.png";
+			"/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSet6/frame11.png";
 	char ground_truth_file[] =
-			"/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSetMario/mario_flow_2.flo";
+			"/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSet6/ground_truth.flo";
 
 
 
@@ -95,13 +95,13 @@ int main()
 	cout << "Time passed in miliseconds: " << dataOpencvPyr.time << endl;*/
 
 
-	/*namedWindow("Paparazzi optical flow", WINDOW_AUTOSIZE);
+	namedWindow("Paparazzi optical flow", WINDOW_AUTOSIZE);
 	namedWindow("OpenCV optical flow", WINDOW_AUTOSIZE);
 	//namedWindow("OpenCV with pyramids optical flow", WINDOW_AUTOSIZE);
 	imshow("Paparazzi optical flow", dataPaparazzi.flow_viz);
 	imshow("OpenCV optical flow", dataOpencv.flow_viz);
 	//imshow("OpenCV with pyramids optical flow", dataOpencvPyr.flow_viz);
-	waitKey();*/
+	waitKey();
 
 
 
