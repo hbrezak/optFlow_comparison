@@ -80,7 +80,7 @@ void optFlow_paparazzi(char* curImagePath, char* nextImagePath, char* groundTrut
 	double time = (double)getTickCount();
 	struct flow_t *vectors = opticFlowLK(&nextGray, &curGray, corners, &numTracked,
 	                                       window_size / 2, subpixel_factor, max_iterations,
-										   step_threshold, max_track_corners);
+										   step_threshold, max_track_corners, 0);
 	time = (((double)getTickCount() - time)/getTickFrequency())*1000; //in miliseconds
 	results.time = time;
 
@@ -115,7 +115,7 @@ void optFlow_paparazzi(char* curImagePath, char* nextImagePath, char* groundTrut
 
 
 
-	image_t test;
+	/*image_t test;
 	image_create(&test, 15, 15, IMAGE_YUV422);
 	uint8_t* buf = (uint8_t*)test.buf;
 	char data[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13 ,14 ,15, 16};//, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31 ,32 ,33,34,35,36};
@@ -128,7 +128,7 @@ void optFlow_paparazzi(char* curImagePath, char* nextImagePath, char* groundTrut
 			printf("%4d ", *buff_pointer++);
 			if (!((i+1)%test.w))
 				printf("\n");
-	}
+	}*/
 /*
 	image_t result;
 
@@ -157,14 +157,14 @@ void optFlow_paparazzi(char* curImagePath, char* nextImagePath, char* groundTrut
 			if (!((i+1)%ref->w))
 				printf("\n");
 	}*/
-	printf("Before pyramids \n");
-	uint8_t pyramid_levels = 3;
+	/*printf("Before pyramids \n");
+	uint8_t pyramid_levels = 0; //If zero, pyramids are not used. Original image is copied into pyramid_I[0]
 	struct image_t *pyramid_I;
 	//struct image_t pyramid_I[pyramid_levels];
-	pyramid_I = (struct image_t *)malloc(sizeof(struct image_t) * pyramid_levels);
+	pyramid_I = (struct image_t *)malloc(sizeof(struct image_t) * (pyramid_levels+1));
 	pyramid_build(&test, pyramid_I, pyramid_levels);
 
-    uint8_t show_level = 1;
+    uint8_t show_level = pyramid_levels;
 	//for (uint8_t i = 0; i != show_level; i++){
 		buff_pointer = (uint8_t *)pyramid_I[show_level].buf;
 
@@ -175,7 +175,7 @@ void optFlow_paparazzi(char* curImagePath, char* nextImagePath, char* groundTrut
 				printf("\n");
 		}
 	//}
-		printf("width %u, height %u \n", pyramid_I[show_level].w, pyramid_I[show_level].h);
+		printf("width %u, height %u \n", pyramid_I[show_level].w, pyramid_I[show_level].h);*/
 
 
 

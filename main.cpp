@@ -68,14 +68,14 @@ int main()
 
 
 	optFlow_paparazzi(firstImg, secondImg, ground_truth_file, currPoints, dataPaparazzi);
-	//optFlow_opencv(firstImg, secondImg, ground_truth_file, currPoints, 0, dataOpencv);
+	optFlow_opencv(firstImg, secondImg, ground_truth_file, currPoints, 0, dataOpencv);
 
 	//optFlow_opencv(firstImg, secondImg, ground_truth_file, currPoints, pyrLevel, dataOpencvPyr);
 
 
 	cout << endl; cout << endl;
 
-	/*cout << "Paparazzi results: " << endl;
+	cout << "Paparazzi results: " << endl;
 	cout << "Average magnitude error: " << dataPaparazzi.magErr <<endl;
 	cout << "Average angular error: " << dataPaparazzi.angErr << endl;
 	cout << "Time passed in miliseconds: " << dataPaparazzi.time << endl;
@@ -85,7 +85,7 @@ int main()
 	cout << "OpenCV results: " << endl;
 	cout << "Average magnitude error: " << dataOpencv.magErr << endl;
 	cout << "Average angular error: " << dataOpencv.angErr << endl;
-	cout << "Time passed in miliseconds: " << dataOpencv.time << endl;*/
+	cout << "Time passed in miliseconds: " << dataOpencv.time << endl;
 
 	/*cout << endl; cout << endl;
 
