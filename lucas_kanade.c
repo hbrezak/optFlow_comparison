@@ -110,6 +110,7 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 
 	for (int8_t LVL = pyramid_level; LVL != -1; LVL--) {
 
+		printf("Pyramid level %d \n", LVL);
 		uint16_t points_orig = *points_cnt;
 		*points_cnt = 0;
 		//new_p, points_cnt are related to number of points, wont overflow
@@ -127,20 +128,20 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 
 			if (LVL == pyramid_level){
 
-				// If the pixel is outside ROI, do not track it
-				if (points[p].x < half_window_size || (pyramid_old[LVL].w - points[p].x) < half_window_size	|| points[p].y < half_window_size
-						|| (pyramid_old[LVL].h - points[p].y) < half_window_size) {
-					printf("Input feature outside ROI %u, %u \n", points[p].x, points[p].y); //ADDED
-					//CONC: consistent in not tracking edge features
-					continue;
-				}
-
 				// Convert the point to a subpixel coordinate
 				vectors[new_p].pos.x = (points[p].x * subpixel_factor) / exp; //this overflows for s_f = 1000; change point_t pos
 				vectors[new_p].pos.y = (points[p].y * subpixel_factor) / exp; //this overflows for s_f = 1000; change point_t pos
 				vectors[new_p].flow_x = 0;
 				vectors[new_p].flow_y = 0;
 				//printf("Convert point %u %u to subpix: %u, %u \n", points[p].x, points[p].y, vectors[new_p].pos.x,  vectors[new_p].pos.y);
+
+				// If the pixel is outside ROI, do not track it
+				if (vectors[new_p].pos.x < half_window_size || (pyramid_old[LVL].w - vectors[new_p].pos.x) < half_window_size
+						|| vectors[new_p].pos.y < half_window_size || (pyramid_old[LVL].h - vectors[new_p].pos.y) < half_window_size) {
+					printf("Input feature outside ROI %u, %u \n", vectors[new_p].pos.x, vectors[new_p].pos.y); //ADDED
+					//CONC: consistent in not tracking edge features
+					continue;
+				}
 			} else {
 				// Convert last pyramid level flow into this pyramid level flow guess
 				vectors[new_p].pos.x = 2 * vectors[new_p].pos.x;
@@ -176,10 +177,11 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 				struct point_t new_point = { vectors[new_p].pos.x  + vectors[new_p].flow_x,
 											 vectors[new_p].pos.y + vectors[new_p].flow_y };
 				// If the pixel is outside ROI, do not track it
-				if (new_point.x / subpixel_factor < half_window_size || (pyramid_old[LVL].w - new_point.x / subpixel_factor) < half_window_size
-						|| new_point.y / subpixel_factor < half_window_size || (pyramid_old[LVL].h - new_point.y / subpixel_factor)< half_window_size) {
+				if (new_point.x / subpixel_factor < half_window_size || (pyramid_new[LVL].w - new_point.x / subpixel_factor) < half_window_size
+						|| new_point.y / subpixel_factor < half_window_size || (pyramid_new[LVL].h - new_point.y / subpixel_factor)< half_window_size) {
 					tracked = FALSE;
-					printf("*New point outside ROI %u, %u \n", new_point.x,	new_point.y); //ADDED
+					printf("*New point outside ROI %u, %u; window size w %u h %u \n",
+							new_point.x /subpixel_factor, new_point.y/subpixel_factor, pyramid_new[LVL].w, pyramid_new[LVL].h); //ADDED
 					break;
 				}
 

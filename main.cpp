@@ -71,11 +71,11 @@ int main()
 	optFlow_opencv(firstImg, secondImg, ground_truth_file, currPoints, 0, dataOpencv);
 
 	//optFlow_opencv(firstImg, secondImg, ground_truth_file, currPoints, pyrLevel, dataOpencvPyr);
-
-
-	cout << endl; cout << endl;
-
+	cout << endl;
+	cout << "Starting number of points: " << currPoints.size() << endl;
+	cout << endl;
 	cout << "Paparazzi results: " << endl;
+	cout << "Number of points left: " << dataPaparazzi.points_left << endl;
 	cout << "Average magnitude error: " << dataPaparazzi.magErr <<endl;
 	cout << "Average angular error: " << dataPaparazzi.angErr << endl;
 	cout << "Time passed in miliseconds: " << dataPaparazzi.time << endl;
@@ -83,6 +83,7 @@ int main()
 	cout << endl; cout << endl;
 
 	cout << "OpenCV results: " << endl;
+	cout << "Number of points left: " << dataOpencv.points_left << endl;
 	cout << "Average magnitude error: " << dataOpencv.magErr << endl;
 	cout << "Average angular error: " << dataOpencv.angErr << endl;
 	cout << "Time passed in miliseconds: " << dataOpencv.time << endl;

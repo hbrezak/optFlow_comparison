@@ -85,6 +85,7 @@ void optFlow_opencv(char* curImagePath, char* nextImagePath, char* groundTruthPa
 
 	calcErrorMetrics(groundTruthPath, lk_flow, results.angErr, results.magErr);
 
+	results.points_left = currPoints.size();
 	results.flow_viz = showFlow(currFrame, nextFrame, curImagePath, lk_flow);
 }
 

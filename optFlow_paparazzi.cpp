@@ -110,6 +110,8 @@ void optFlow_paparazzi(char* curImagePath, char* nextImagePath, char* groundTrut
 
 	calcErrorMetrics(groundTruthPath, lk_flow, results.angErr, results.magErr);
 
+	results.points_left = numTracked;
+
 	//Vizualise calculated optical flow with arrow field
 	results.flow_viz = showFlow(curImg, nextImg, curImagePath, lk_flow);
 
