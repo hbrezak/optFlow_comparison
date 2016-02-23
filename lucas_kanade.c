@@ -138,7 +138,7 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 				// If the pixel is outside ROI, do not track it
 				if (vectors[new_p].pos.x < half_window_size || (pyramid_old[LVL].w - vectors[new_p].pos.x) < half_window_size
 						|| vectors[new_p].pos.y < half_window_size || (pyramid_old[LVL].h - vectors[new_p].pos.y) < half_window_size) {
-					//printf("Input feature outside ROI %u, %u \n", vectors[new_p].pos.x, vectors[new_p].pos.y); //ADDED
+					printf("Input feature outside ROI %u, %u \n", vectors[new_p].pos.x, vectors[new_p].pos.y); //ADDED
 					//CONC: consistent in not tracking edge features
 					continue;
 				}
@@ -167,7 +167,7 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 
 			// Check if the determinant is bigger than 1
 			if (Det < 1) {
-				//printf("Determinant smaller than 1 for %d %d \n", points[p].x, points[p].y); //ADDED
+				printf("Determinant smaller than 1 for %d %d \n", points[p].x, points[p].y); //ADDED
 				continue;
 			}
 
@@ -180,7 +180,7 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 				if (new_point.x / subpixel_factor < half_window_size || (pyramid_new[LVL].w - new_point.x / subpixel_factor) < half_window_size
 						|| new_point.y / subpixel_factor < half_window_size || (pyramid_new[LVL].h - new_point.y / subpixel_factor)< half_window_size) {
 					tracked = FALSE;
-					//printf("*New point outside ROI %u, %u; window size w %u h %u \n",
+					printf("*New point outside ROI %u, %u; window size w %u h %u \n",
 							new_point.x /subpixel_factor, new_point.y/subpixel_factor, pyramid_new[LVL].w, pyramid_new[LVL].h); //ADDED
 					break;
 				}
@@ -193,7 +193,7 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 
 				if (error > error_threshold && it > max_iterations / 2) {
 					tracked = FALSE;
-					//printf("*Error larger than error treshold for %d %d \n", points[p].x, points[p].y); //ADDED
+					printf("*Error larger than error treshold for %d %d \n", points[p].x, points[p].y); //ADDED
 					break;
 				}
 

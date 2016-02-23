@@ -34,14 +34,22 @@ using namespace std;
 
 int main()
 {
-	vector<string> *image_filenames;
+	//Enter the path for images
+	char firstImg[] =
+			"/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSet5/frame10.png";
+	char secondImg[] =
+			"/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSet5/frame11.png";
+	char ground_truth_file[] =
+			"/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSet5/ground_truth.flo";
+
+	/*vector<string> *image_filenames;
 	vector<string> *ground_truth_filenames;
 
 
 	image_filenames = listdir("/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSeq1/images");
 	ground_truth_filenames = listdir("/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSeq1/ground_truth");
-	for (vector<string>::const_iterator it = ground_truth_filenames->begin(); it!=ground_truth_filenames->end(); it++)
-		cout << *it << endl;
+	//for (vector<string>::const_iterator it = ground_truth_filenames->begin(); it!=ground_truth_filenames->end(); it++)
+	//	cout << *it << endl;
 
 	vector<string>::const_iterator image_files, ground_truth_files;
 	image_files = image_filenames->begin() + 2;
@@ -53,15 +61,7 @@ int main()
 	char ground_truth_file[len];
 	strcpy(firstImg, (*image_files).c_str());
 	image_files++;
-
-
-	/*//Enter the path for images
-	char firstImg[] =
-			"/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSet6/frame10.png";
-	char secondImg[] =
-			"/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSet6/frame11.png";
-	char ground_truth_file[] =
-			"/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSet6/ground_truth.flo";*/
+	int frame = 1;
 
 	while (image_files != image_filenames->end())
 	{
@@ -69,6 +69,7 @@ int main()
 	strcpy(secondImg, (*image_files).c_str());
 	strcpy(ground_truth_file, (*ground_truth_files).c_str());
 
+	cout << "Frames " << frame << " - " << frame+1<< endl;*/
 	//Find good features to track
 	//Initalize some constants and parameters
 	const int MAX_FEATURES = 150;
@@ -98,6 +99,8 @@ int main()
 
 	//optFlow_opencv(firstImg, secondImg, ground_truth_file, currPoints, pyrLevel, dataOpencvPyr);
 	cout << endl;
+
+
 	cout << "Starting number of points: " << currPoints.size() << endl;
 	cout << endl;
 	cout << "Paparazzi results: " << endl;
@@ -107,12 +110,12 @@ int main()
 	cout << "Time passed in miliseconds: " << dataPaparazzi.time << endl;
 
 	cout << endl; cout << endl;
-
 	cout << "OpenCV results: " << endl;
 	cout << "Number of points left: " << dataOpencv.points_left << endl;
 	cout << "Average magnitude error: " << dataOpencv.magErr << endl;
 	cout << "Average angular error: " << dataOpencv.angErr << endl;
 	cout << "Time passed in miliseconds: " << dataOpencv.time << endl;
+	cout << endl;
 
 	/*cout << endl; cout << endl;
 
@@ -121,7 +124,7 @@ int main()
 	cout << "Average angular error: " << dataOpencvPyr.angErr << endl;
 	cout << "Time passed in miliseconds: " << dataOpencvPyr.time << endl;*/
 
-/*
+
 	namedWindow("Paparazzi optical flow", WINDOW_AUTOSIZE);
 	namedWindow("OpenCV optical flow", WINDOW_AUTOSIZE);
 	//namedWindow("OpenCV with pyramids optical flow", WINDOW_AUTOSIZE);
@@ -129,11 +132,12 @@ int main()
 	imshow("OpenCV optical flow", dataOpencv.flow_viz);
 	//imshow("OpenCV with pyramids optical flow", dataOpencvPyr.flow_viz);
 	waitKey();
-*/
-	strcpy(firstImg, (*image_files).c_str());
+
+	/*strcpy(firstImg, (*image_files).c_str());
 	image_files++;
 	ground_truth_files++;
-	}
+	frame++;
+	}*/
 
 
 	return 0;
