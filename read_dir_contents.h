@@ -11,7 +11,7 @@
 #include <string>
 #include <vector>
 
-std::vector<std::string> *listdir(const char *dirname);
+std::vector<std::string> *listdir(const std::string& dirname);
 
 
 

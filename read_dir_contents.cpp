@@ -22,14 +22,14 @@
 
 using namespace std;
 
-vector<string> *listdir(const char *dirname) {
+vector<string> *listdir(const string& dirname) {
   DIR *dp;
   dirent *d;
   vector<string> *vec = new vector<string>;
 
-  dp = opendir(dirname);
+  dp = opendir(dirname.c_str());
   while((d = readdir(dp)) != NULL)
-    vec->push_back(d->d_name);
+    vec->push_back(dirname+'/'+d->d_name);
 
   sort(vec->begin(), vec->end());
   return vec;

@@ -34,13 +34,14 @@ using namespace std;
 
 int main()
 {
-	vector<string> *listImages;
-	//vector<string> *listGroundTruth;
+	vector<string> *image_filenames;
+	vector<string> *ground_truth_filenames;
 
 
-	  listImages = listdir("/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSeq1/images");
-	  for (vector<string>::const_iterator it = listImages->begin(); it!=listImages->end(); it++)
-		  cout << *it << endl;
+	image_filenames = listdir("/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSeq1/images");
+	ground_truth_filenames = listdir("/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSeq1/ground_truth");
+	for (vector<string>::const_iterator it = ground_truth_filenames->begin(); it!=ground_truth_filenames->end(); it++)
+		cout << *it << endl;
 
 
 	//Enter the path for images
