@@ -25,6 +25,7 @@
 #include "time.h"
 #include "optFlow_opencv.h"
 #include "optFlow_paparazzi.h"
+#include "read_dir_contents.h"
 
 
 using namespace cv;
@@ -33,6 +34,15 @@ using namespace std;
 
 int main()
 {
+	vector<string> *listImages;
+	//vector<string> *listGroundTruth;
+
+
+	  listImages = listdir("/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSeq1/images");
+	  for (vector<string>::const_iterator it = listImages->begin(); it!=listImages->end(); it++)
+		  cout << *it << endl;
+
+
 	//Enter the path for images
 	char firstImg[] =
 			"/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSet6/frame10.png";
