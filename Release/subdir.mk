@@ -9,7 +9,6 @@ CPP_SRCS += \
 ../optFlow_opencv.cpp \
 ../optFlow_paparazzi.cpp \
 ../readGroundTruth.cpp \
-../read_dir_filenames.cpp \
 ../rgb2yuv422.cpp \
 ../showFlow.cpp 
 
@@ -27,7 +26,6 @@ OBJS += \
 ./optFlow_opencv.o \
 ./optFlow_paparazzi.o \
 ./readGroundTruth.o \
-./read_dir_filenames.o \
 ./rgb2yuv422.o \
 ./showFlow.o 
 
@@ -42,7 +40,6 @@ CPP_DEPS += \
 ./optFlow_opencv.d \
 ./optFlow_paparazzi.d \
 ./readGroundTruth.d \
-./read_dir_filenames.d \
 ./rgb2yuv422.d \
 ./showFlow.d 
 

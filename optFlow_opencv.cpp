@@ -21,7 +21,7 @@ using namespace cv;
 using namespace std;
 
 
-void optFlow_opencv(char* curImagePath,char* nextImagePath,char* groundTruthPath, const vector<Point2f>& currPoints, int pyrLevel, flowResults& results )
+void optFlow_opencv(char* curImagePath, char* nextImagePath, char* groundTruthPath, const vector<Point2f>& currPoints, int pyrLevel, flowResults& results )
 {
 	TermCriteria termcrit(TermCriteria::COUNT | TermCriteria::EPS, 20, 0.03);
 	Size subPixWinSize(10, 10), winSize(31, 31);
@@ -54,9 +54,9 @@ void optFlow_opencv(char* curImagePath,char* nextImagePath,char* groundTruthPath
 	//cout << "Format: row -- column" << endl;
 
 
-	//cout << endl;
-	//cout << "OpenCV tracked points(column -- row) " << endl;
-	//cout << "Total number of points: "<< currPoints.size() << endl;
+	/*cout << endl;
+	cout << "OpenCV tracked points(column -- row) " << endl;
+	cout << "Total number of points: "<< currPoints.size() << endl;*/
 	for (vector<Point2f>::size_type i = 0; i!= currPoints.size(); i++){
 		//cout << currPoints[i].y << "--" << currPoints[i].x << "        " << nextPoints[i].y << "--" << nextPoints[i].x << endl;
 		//if (err[i] < 10){ // comment out this if command if you want whole output. this uses errors that calcLK provides to
@@ -68,7 +68,6 @@ void optFlow_opencv(char* curImagePath,char* nextImagePath,char* groundTruthPath
 		lk_flow.push_back(var);}
 		//cout << var.pos.x << " " << var.pos.y << endl;
 	//}
-
 /*	cout << endl;
 	cout << "OpenCV flow (hor_flow -- vert_flow)" << endl;
 	for (vector<flow_t_>::const_iterator it = lk_flow.begin(); it!=lk_flow.end(); it++)

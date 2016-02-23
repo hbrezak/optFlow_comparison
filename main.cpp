@@ -25,7 +25,6 @@
 #include "time.h"
 #include "optFlow_opencv.h"
 #include "optFlow_paparazzi.h"
-#include "read_dir_filenames.h"
 
 
 using namespace cv;
@@ -34,39 +33,13 @@ using namespace std;
 
 int main()
 {
-	vector<string> * imagesList;
-	vector<string> * groundTruthList;
-
-	imagesList = listdir("/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSeq1/images");
-	groundTruthList = listdir("/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSeq1/ground_truth");
-
-	vector<string>::const_iterator imgList = imagesList->begin() + 2;
-	vector<string>::const_iterator gtList = groundTruthList->begin() + 2;
-
-    char firstImg[100];
-    char secondImg[100];
-    char ground_truth_file[100];
-
-
-    strcpy(firstImg, (*imgList).c_str());
-
-	imgList++;
-
-
-	while (imgList != imagesList->end()) {
-		strcpy(secondImg, (*imgList).c_str());
-		imgList++;
-		strcpy(ground_truth_file, (*gtList).c_str());
-		gtList++;
-
-
-	/*//Enter the path for images
+	//Enter the path for images
 	char firstImg[] =
 			"/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSet6/frame10.png";
 	char secondImg[] =
 			"/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSet6/frame11.png";
 	char ground_truth_file[] =
-			"/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSet6/ground_truth.flo";*/
+			"/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSet6/ground_truth.flo";
 
 
 
@@ -74,11 +47,7 @@ int main()
 	//Initalize some constants and parameters
 	const int MAX_FEATURES = 150;
 	//int pyrLevel = 2;	 // max value is 3; 0 == pyramids not used(1 lvl), 1 == 2 levels used
-	cout << firstImg << endl;
 	Mat curFrame = imread(firstImg, IMREAD_GRAYSCALE);
-	namedWindow("test", WINDOW_AUTOSIZE);
-	imshow("test", curFrame);
-	waitKey();
 	vector<Point2f> currPoints; //typedef Point_<float> Point2f;
 	//REMEMBER! currPoints.x == width == columns; currPoints.y == height == rows;
 
@@ -126,7 +95,7 @@ int main()
 	cout << "Average angular error: " << dataOpencvPyr.angErr << endl;
 	cout << "Time passed in miliseconds: " << dataOpencvPyr.time << endl;*/
 
-/*
+
 	namedWindow("Paparazzi optical flow", WINDOW_AUTOSIZE);
 	namedWindow("OpenCV optical flow", WINDOW_AUTOSIZE);
 	//namedWindow("OpenCV with pyramids optical flow", WINDOW_AUTOSIZE);
@@ -134,10 +103,7 @@ int main()
 	imshow("OpenCV optical flow", dataOpencv.flow_viz);
 	//imshow("OpenCV with pyramids optical flow", dataOpencvPyr.flow_viz);
 	waitKey();
-*/
 
-	strcpy(firstImg, secondImg);
-	}
 
 
 	return 0;
