@@ -43,16 +43,31 @@ int main()
 	for (vector<string>::const_iterator it = ground_truth_filenames->begin(); it!=ground_truth_filenames->end(); it++)
 		cout << *it << endl;
 
+	vector<string>::const_iterator image_files, ground_truth_files;
+	image_files = image_filenames->begin() + 2;
+	ground_truth_files = ground_truth_filenames->begin() + 2;
 
-	//Enter the path for images
+	string::size_type len = (*image_files).size() > (*ground_truth_files).size() ? (*image_files).size() : (*ground_truth_files).size();
+	char firstImg[len];
+	char secondImg[len];
+	char ground_truth_file[len];
+	strcpy(firstImg, (*image_files).c_str());
+	image_files++;
+
+
+	/*//Enter the path for images
 	char firstImg[] =
 			"/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSet6/frame10.png";
 	char secondImg[] =
 			"/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSet6/frame11.png";
 	char ground_truth_file[] =
-			"/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSet6/ground_truth.flo";
+			"/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSet6/ground_truth.flo";*/
 
+	while (image_files != image_filenames->end())
+	{
 
+	strcpy(secondImg, (*image_files).c_str());
+	strcpy(ground_truth_file, (*ground_truth_files).c_str());
 
 	//Find good features to track
 	//Initalize some constants and parameters
@@ -106,7 +121,7 @@ int main()
 	cout << "Average angular error: " << dataOpencvPyr.angErr << endl;
 	cout << "Time passed in miliseconds: " << dataOpencvPyr.time << endl;*/
 
-
+/*
 	namedWindow("Paparazzi optical flow", WINDOW_AUTOSIZE);
 	namedWindow("OpenCV optical flow", WINDOW_AUTOSIZE);
 	//namedWindow("OpenCV with pyramids optical flow", WINDOW_AUTOSIZE);
@@ -114,7 +129,11 @@ int main()
 	imshow("OpenCV optical flow", dataOpencv.flow_viz);
 	//imshow("OpenCV with pyramids optical flow", dataOpencvPyr.flow_viz);
 	waitKey();
-
+*/
+	strcpy(firstImg, (*image_files).c_str());
+	image_files++;
+	ground_truth_files++;
+	}
 
 
 	return 0;
