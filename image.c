@@ -477,6 +477,7 @@ void image_calculate_g(struct image_t *dx, struct image_t *dy, int32_t *g)
       sum_dxx += ((int32_t)dx_buf[y * dx->w + x] * dx_buf[y * dx->w + x]);
       sum_dxy += ((int32_t)dx_buf[y * dx->w + x] * dy_buf[y * dy->w + x]);
       sum_dyy += ((int32_t)dy_buf[y * dy->w + x] * dy_buf[y * dy->w + x]);
+
     }
   }
   //printf("sum_dxx squared: %d dim are %u %u \n", sum_dxx, dx->w, dy->h); // u razini 100 000

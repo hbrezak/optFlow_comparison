@@ -143,7 +143,7 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 				//printf("Convert point %u %u to subpix: %u, %u \n", points[p].x, points[p].y, vectors[new_p].pos.x,  vectors[new_p].pos.y);
 
 				//printf("%u x %u, pos y %u, flowx %d, flowy %d \n", i, vectors[new_p].pos.x, vectors[new_p].pos.y,vectors[new_p].flow_x, vectors[new_p].flow_y );
-				//sleep(1);
+
 
 				// If the pixel is outside ROI, do not track it
 				if (vectors[new_p].pos.x/subpixel_factor < half_window_size || (pyramid_old[LVL].w - vectors[new_p].pos.x/subpixel_factor) < half_window_size
@@ -171,7 +171,7 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 					printf("V2 Input feature outside ROI %u, %u \n",vectors[new_p].pos.x/subpixel_factor, vectors[new_p].pos.y); //ADDED
 					//CONC: consistent in not tracking edge features
 					continue;
-			}
+				}
 			}
 
 			// (1) determine the subpixel neighborhood in the old image
@@ -185,15 +185,17 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 			image_calculate_g(&window_DX, &window_DY, G);
 
 			// calculate G's determinant in subpixel units:
-			int32_t Det = ((int64_t) G[0] * G[3] - G[1] * G[2])	/ subpixel_factor; // 1000 * 1000
-			//printf("Max umnozak za det: %d \n", G[0]*G[3]); // milijuni
+			int32_t Det = ( G[0] * G[3] - G[1] * G[2]);//	/ subpixel_factor; // 1000 * 1000
+			//printf("Max umnozak za det: %d \n", G[0]*G[3]); // milijuni za subpix = 10 000 i wind 10; za wind 31 deset mil
 			//printf("Determinanta: %d \n", Det);
 			//printf("Determinanta prava: %f \n",((float)G[0] * G[3] - G[1] * G[2])/ subpixel_factor);
 
 			// Check if the determinant is bigger than 1
-			if (Det < 0.0005) {
+			if (Det < (0.0005*subpixel_factor)) {
 				printf("Determinant smaller than 1 for %u %u, i = %u\n", vectors[new_p].pos.x/subpixel_factor, vectors[new_p].pos.y/subpixel_factor, i); //ADDED
-				//printf("Members %d * %d - %d * %d \n", G[0],G[3],G[1],G[2]);
+				printf("Members %d * %d - %d * %d \n", G[0],G[3],G[1],G[2]);
+				printf("Determinanta prava: %f \n",((float)G[0] * G[3] - G[1] * G[2])/ subpixel_factor);
+				printf("Determinanta: %d \n", Det);
 				continue;
 			}
 
@@ -227,9 +229,10 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 				int32_t b_y = image_multiply(&window_diff, &window_DY, NULL) / 255;
 
 				//     [d] calculate the additional flow step and possibly terminate the iteration
-				int32_t step_x = (G[3] * b_x - G[1] * b_y) / Det; //CHANGED 16 -> 32
-				int32_t step_y = (G[0] * b_y - G[2] * b_x) / Det; //CHANGED 16 -> 32
-				//printf("step x %d step y %d \n", step_x, step_y);
+				int64_t step_x = (( (int64_t) G[3] * b_x - G[1] * b_y) * subpixel_factor) / Det; //CHANGED 16 -> 32; changes made so DET is in subpixel now (less point rejection)
+				int64_t step_y = (( (int64_t) G[0] * b_y - G[2] * b_x) * subpixel_factor) / Det; //CHANGED 16 -> 32; possibly change subpx factor and then this datatype to 32
+				//printf("step x %ld step y %ld \n", step_x, step_y);
+				//printf("is it large? %ld \n", (((int64_t)G[3] * b_x - G[1] * b_y)*subpixel_factor));
 				vectors[new_p].flow_x += step_x;
 				vectors[new_p].flow_y += step_y;
 				//printf("suma flow x %d  flow y %d \n",vectors[new_p].flow_x, vectors[new_p].flow_y);
