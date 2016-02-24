@@ -41,6 +41,7 @@
 #include <string.h>
 #include "lucas_kanade.h"
 
+
 /**
  * Compute the optical flow of several points using the Lucas-Kanade algorithm by Yves Bouguet
  * The initial fixed-point implementation is doen by G. de Croon and is adapted by
@@ -58,6 +59,8 @@
  */
 struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, struct point_t *points, uint16_t *points_cnt, uint16_t half_window_size,
 		uint32_t subpixel_factor, uint8_t max_iterations, uint8_t step_threshold, uint16_t max_points, uint8_t pyramid_level) {
+
+	//CHANGED step_threshold
 	// A straightforward one-level implementation of Lucas-Kanade.
 	// For all points:
 	// (1) determine the subpixel neighborhood in the old image
@@ -111,8 +114,11 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 	for (int8_t LVL = pyramid_level; LVL != -1; LVL--) {
 
 		printf("Pyramid level %d \n", LVL);
+
+		printf("max p %u, orig p %u, p_cnt %u \n", max_points, 0, *points_cnt);
 		uint16_t points_orig = *points_cnt;
 		*points_cnt = 0;
+		printf("max p %u, orig p %u, p_cnt %u \n", max_points, points_orig, *points_cnt);
 		//new_p, points_cnt are related to number of points, wont overflow
 
 		// Calculate the amount of points to skip
@@ -123,31 +129,49 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 		// Go through all points
 		for (uint16_t i = 0; i < max_points && i < points_orig; i++) {
 
-			uint16_t p = i ;//* skip_points;
+			//uint16_t p = i ;//* skip_points;
+
 
 
 			if (LVL == pyramid_level){
 
 				// Convert the point to a subpixel coordinate
-				vectors[new_p].pos.x = (points[p].x * subpixel_factor) / exp; //this overflows for s_f = 1000; change point_t pos
-				vectors[new_p].pos.y = (points[p].y * subpixel_factor) / exp; //this overflows for s_f = 1000; change point_t pos
+				vectors[new_p].pos.x = (points[i].x * subpixel_factor) / exp; //this overflows for s_f = 1000; change point_t pos
+				vectors[new_p].pos.y = (points[i].y * subpixel_factor) / exp; //this overflows for s_f = 1000; change point_t pos
 				vectors[new_p].flow_x = 0;
 				vectors[new_p].flow_y = 0;
 				//printf("Convert point %u %u to subpix: %u, %u \n", points[p].x, points[p].y, vectors[new_p].pos.x,  vectors[new_p].pos.y);
 
+				//printf("%u x %u, pos y %u, flowx %d, flowy %d \n", i, vectors[new_p].pos.x, vectors[new_p].pos.y,vectors[new_p].flow_x, vectors[new_p].flow_y );
+				//sleep(1);
+
 				// If the pixel is outside ROI, do not track it
-				if (vectors[new_p].pos.x < half_window_size || (pyramid_old[LVL].w - vectors[new_p].pos.x) < half_window_size
-						|| vectors[new_p].pos.y < half_window_size || (pyramid_old[LVL].h - vectors[new_p].pos.y) < half_window_size) {
-					printf("Input feature outside ROI %u, %u \n", vectors[new_p].pos.x, vectors[new_p].pos.y); //ADDED
+				if (vectors[new_p].pos.x/subpixel_factor < half_window_size || (pyramid_old[LVL].w - vectors[new_p].pos.x/subpixel_factor) < half_window_size
+						|| vectors[new_p].pos.y/subpixel_factor < half_window_size || (pyramid_old[LVL].h - vectors[new_p].pos.y/subpixel_factor) < half_window_size) {
+					printf("Input feature outside ROI %u, %u ; image size: %u %u\n", vectors[new_p].pos.x/subpixel_factor, vectors[new_p].pos.y/subpixel_factor,
+							pyramid_old[LVL].w, pyramid_old[LVL].h); //ADDED
 					//CONC: consistent in not tracking edge features
 					continue;
 				}
 			} else {
 				// Convert last pyramid level flow into this pyramid level flow guess
-				vectors[new_p].pos.x = 2 * vectors[new_p].pos.x;
-				vectors[new_p].pos.y = 2 * vectors[new_p].pos.y;
-				vectors[new_p].flow_x = 2 * vectors[new_p].flow_x;
-				vectors[new_p].flow_y = 2 * vectors[new_p].flow_y;
+				//printf("2nd pyr lvl: pos x %u, flow x %d \n", vectors[new_p].pos.x, vectors[new_p].flow_x);
+
+				vectors[new_p].pos.x = 2 * vectors[i].pos.x;
+				vectors[new_p].pos.y = 2 * vectors[i].pos.y;
+				vectors[new_p].flow_x = 2 * vectors[i].flow_x;
+				vectors[new_p].flow_y = 2 * vectors[i].flow_y;
+
+				//printf("%u x %u, pos y %u, flowx %d, flowy %d \n", i, vectors[new_p].pos.x, vectors[new_p].pos.y,vectors[new_p].flow_x, vectors[new_p].flow_y );
+				//sleep(1);
+
+				// If the pixel is outside ROI, do not track it
+				if (vectors[new_p].pos.x/subpixel_factor < half_window_size || (pyramid_old[LVL].w - vectors[new_p].pos.x/subpixel_factor) < half_window_size
+						|| vectors[new_p].pos.y/subpixel_factor < half_window_size || (pyramid_old[LVL].h - vectors[new_p].pos.y/subpixel_factor) < half_window_size) {
+					printf("V2 Input feature outside ROI %u, %u \n",vectors[new_p].pos.x/subpixel_factor, vectors[new_p].pos.y); //ADDED
+					//CONC: consistent in not tracking edge features
+					continue;
+			}
 			}
 
 			// (1) determine the subpixel neighborhood in the old image
@@ -164,10 +188,12 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 			int32_t Det = ((int64_t) G[0] * G[3] - G[1] * G[2])	/ subpixel_factor; // 1000 * 1000
 			//printf("Max umnozak za det: %d \n", G[0]*G[3]); // milijuni
 			//printf("Determinanta: %d \n", Det);
+			//printf("Determinanta prava: %f \n",((float)G[0] * G[3] - G[1] * G[2])/ subpixel_factor);
 
 			// Check if the determinant is bigger than 1
-			if (Det < 1) {
-				printf("Determinant smaller than 1 for %d %d \n", points[p].x, points[p].y); //ADDED
+			if (Det < 0.0005) {
+				printf("Determinant smaller than 1 for %u %u, i = %u\n", vectors[new_p].pos.x/subpixel_factor, vectors[new_p].pos.y/subpixel_factor, i); //ADDED
+				//printf("Members %d * %d - %d * %d \n", G[0],G[3],G[1],G[2]);
 				continue;
 			}
 
@@ -193,7 +219,7 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 
 				if (error > error_threshold && it > max_iterations / 2) {
 					tracked = FALSE;
-					printf("*Error larger than error treshold for %d %d \n", points[p].x, points[p].y); //ADDED
+					printf("*Error larger than error treshold for %d %d \n", vectors[new_p].pos.x/subpixel_factor, vectors[new_p].pos.y/subpixel_factor); //ADDED
 					break;
 				}
 
@@ -208,10 +234,15 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 				vectors[new_p].flow_y += step_y;
 				//printf("suma flow x %d  flow y %d \n",vectors[new_p].flow_x, vectors[new_p].flow_y);
 
-				// Check if we exceeded the treshold
-				if ((abs(step_x) + abs(step_y)) < step_threshold) {
+				//printf("Flows: %d %d \n", vectors[new_p].flow_x, vectors[new_p].flow_x);
+
+				// Check if we exceeded the treshold CHANGED made this better for 0.03
+				if ((abs(step_x) + abs(step_y)) < (step_threshold*(subpixel_factor/100))) {
+					//printf("step x %d and step threshold %u \n", step_x, (step_threshold*(subpixel_factor/100)));
 					break;
 				}
+
+
 			}
 
 			// If we tracked the point we update the index and the count

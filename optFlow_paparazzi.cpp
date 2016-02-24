@@ -65,7 +65,7 @@ void optFlow_paparazzi(char* curImagePath, char* nextImagePath, char* groundTrut
 	uint16_t window_size = 31; // za ovu 31 vrijednost rezultati fantasticni
 	uint32_t subpixel_factor = 10000; //changed 16 -> 32 here, lucas_kanade.c, lucas_kanade.h; also all functions that use subpixel_factor: image subpixel window,
 	uint8_t max_iterations = 40;
-	uint8_t step_threshold = 0.03;
+	uint8_t step_threshold = 3;
 	uint16_t max_track_corners = sizeof(corners)/sizeof(*corners);
 
 	/* good settings:
@@ -88,8 +88,8 @@ void optFlow_paparazzi(char* curImagePath, char* nextImagePath, char* groundTrut
 	flow_t_ var;
 
 	cout << endl;
-	//cout << "Paparazzi tracked points (column -- row)" << endl;
-	//cout << "Total number of points: "<< numTracked << endl;
+	cout << "Paparazzi tracked points (column -- row)" << endl;
+	cout << "Total number of points: "<< numTracked << endl;
 	// Go through all the points
 	for (uint16_t i = 0; i < numTracked; i++) {
 		//because opticalFlowLK leaves out some corners
@@ -98,7 +98,9 @@ void optFlow_paparazzi(char* curImagePath, char* nextImagePath, char* groundTrut
 		var.flow_x = float(vectors[i].flow_x) / subpixel_factor;
 		var.flow_y = float(vectors[i].flow_y) / subpixel_factor;
 		lk_flow.push_back(var);
-		//cout << var.pos.x << " " << var.pos.y << endl;
+		cout << var.pos.x << " " << var.pos.y << endl;
+
+
 	}
 
 	/*cout << endl;

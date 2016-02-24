@@ -479,9 +479,9 @@ void image_calculate_g(struct image_t *dx, struct image_t *dy, int32_t *g)
       sum_dyy += ((int32_t)dy_buf[y * dy->w + x] * dy_buf[y * dy->w + x]);
     }
   }
-  //printf("sum_dxx squared: %d \n", sum_dxx); // u razini 100 000
+  //printf("sum_dxx squared: %d dim are %u %u \n", sum_dxx, dx->w, dy->h); // u razini 100 000
 
-  // ouput the G vector
+  // output the G vector
   g[0] = sum_dxx / 255;
   //printf("prvi clan matrice G: %d \n", g[0]); // u razini tisuca
   g[1] = sum_dxy / 255;

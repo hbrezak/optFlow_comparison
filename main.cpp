@@ -83,8 +83,8 @@ int main()
 
 	//Refine good features location - finds subpixels feature location
 	//cornerSubPix(currFrame, currPoints, subPixWinSize, Size(-1,-1), termcrit);
-
-	/*cout << "Points for both algorithms (column -- row)" << endl;
+/*
+	cout << "Points for both algorithms (column -- row)" << endl;
 	cout << "size : " << currPoints.size() << endl;
 	for (unsigned int i = 0; i != currPoints.size(); i++)
 		cout << currPoints[i].x << "   " << currPoints[i].y << endl;
@@ -95,7 +95,7 @@ int main()
 
 
 	optFlow_paparazzi(firstImg, secondImg, ground_truth_file, currPoints, dataPaparazzi);
-	optFlow_opencv(firstImg, secondImg, ground_truth_file, currPoints, 0, dataOpencv);
+	optFlow_opencv(firstImg, secondImg, ground_truth_file, currPoints, 2, dataOpencv);
 
 	//optFlow_opencv(firstImg, secondImg, ground_truth_file, currPoints, pyrLevel, dataOpencvPyr);
 	cout << endl;
