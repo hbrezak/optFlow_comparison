@@ -34,17 +34,16 @@ using namespace std;
 
 int main()
 {
-	//Enter the path for images
+	/*//Enter the path for images
 	char firstImg[] =
 			"/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSet5/frame10.png";
 	char secondImg[] =
 			"/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSet5/frame11.png";
 	char ground_truth_file[] =
 			"/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSet5/ground_truth.flo";
-
-	/*vector<string> *image_filenames;
+*/
+	vector<string> *image_filenames;
 	vector<string> *ground_truth_filenames;
-
 
 	image_filenames = listdir("/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSeq1/images");
 	ground_truth_filenames = listdir("/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSeq1/ground_truth");
@@ -69,7 +68,7 @@ int main()
 	strcpy(secondImg, (*image_files).c_str());
 	strcpy(ground_truth_file, (*ground_truth_files).c_str());
 
-	cout << "Frames " << frame << " - " << frame+1<< endl;*/
+	cout << "Frames " << frame << " - " << frame+1<< endl;
 	//Find good features to track
 	//Initalize some constants and parameters
 	const int MAX_FEATURES = 150;
@@ -115,7 +114,7 @@ int main()
 	cout << "Average magnitude error: " << dataOpencv.magErr << endl;
 	cout << "Average angular error: " << dataOpencv.angErr << endl;
 	cout << "Time passed in miliseconds: " << dataOpencv.time << endl;
-	cout << endl;
+	cout << "=====================================================" << endl;
 
 	/*cout << endl; cout << endl;
 
@@ -133,11 +132,11 @@ int main()
 	//imshow("OpenCV with pyramids optical flow", dataOpencvPyr.flow_viz);
 	waitKey();
 
-	/*strcpy(firstImg, (*image_files).c_str());
+	strcpy(firstImg, (*image_files).c_str());
 	image_files++;
 	ground_truth_files++;
 	frame++;
-	}*/
+	}
 
 
 	return 0;

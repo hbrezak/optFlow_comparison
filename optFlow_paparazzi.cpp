@@ -87,9 +87,9 @@ void optFlow_paparazzi(char* curImagePath, char* nextImagePath, char* groundTrut
 	vector<flow_t_> lk_flow;
 	flow_t_ var;
 
-	cout << endl;
-	cout << "Paparazzi tracked points (column -- row)" << endl;
-	cout << "Total number of points: "<< numTracked << endl;
+	//cout << endl;
+	//cout << "Paparazzi tracked points (column -- row)" << endl;
+	//cout << "Total number of points: "<< numTracked << endl;
 	// Go through all the points
 	for (uint16_t i = 0; i < numTracked; i++) {
 		//because opticalFlowLK leaves out some corners
@@ -98,7 +98,7 @@ void optFlow_paparazzi(char* curImagePath, char* nextImagePath, char* groundTrut
 		var.flow_x = float(vectors[i].flow_x) / subpixel_factor;
 		var.flow_y = float(vectors[i].flow_y) / subpixel_factor;
 		lk_flow.push_back(var);
-		cout << var.pos.x << " " << var.pos.y << endl;
+		//cout << var.pos.x << " " << var.pos.y << endl;
 
 
 	}
