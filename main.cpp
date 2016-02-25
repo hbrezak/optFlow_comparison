@@ -45,8 +45,8 @@ int main()
 	vector<string> *image_filenames;
 	vector<string> *ground_truth_filenames;
 
-	image_filenames = listdir("/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSeq1/images");
-	ground_truth_filenames = listdir("/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSeq1/ground_truth");
+	image_filenames = listdir("/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSequence2/images");
+	ground_truth_filenames = listdir("/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSequence2/ground_truth");
 	//for (vector<string>::const_iterator it = ground_truth_filenames->begin(); it!=ground_truth_filenames->end(); it++)
 	//	cout << *it << endl;
 
@@ -94,7 +94,7 @@ int main()
 
 
 	optFlow_paparazzi(firstImg, secondImg, ground_truth_file, currPoints, dataPaparazzi);
-	optFlow_opencv(firstImg, secondImg, ground_truth_file, currPoints, 2, dataOpencv);
+	//optFlow_opencv(firstImg, secondImg, ground_truth_file, currPoints, 2, dataOpencv);
 
 	//optFlow_opencv(firstImg, secondImg, ground_truth_file, currPoints, pyrLevel, dataOpencvPyr);
 	cout << endl;
@@ -107,7 +107,7 @@ int main()
 	cout << "Average magnitude error: " << dataPaparazzi.magErr <<endl;
 	cout << "Average angular error: " << dataPaparazzi.angErr << endl;
 	cout << "Time passed in miliseconds: " << dataPaparazzi.time << endl;
-
+/*
 	cout << endl; cout << endl;
 	cout << "OpenCV results: " << endl;
 	cout << "Number of points left: " << dataOpencv.points_left << endl;
@@ -115,7 +115,7 @@ int main()
 	cout << "Average angular error: " << dataOpencv.angErr << endl;
 	cout << "Time passed in miliseconds: " << dataOpencv.time << endl;
 	cout << "=====================================================" << endl;
-
+*/
 	/*cout << endl; cout << endl;
 
 	cout << "OpenCV with pyramids results: " << endl;
@@ -123,7 +123,7 @@ int main()
 	cout << "Average angular error: " << dataOpencvPyr.angErr << endl;
 	cout << "Time passed in miliseconds: " << dataOpencvPyr.time << endl;*/
 
-
+/*
 	namedWindow("Paparazzi optical flow", WINDOW_AUTOSIZE);
 	namedWindow("OpenCV optical flow", WINDOW_AUTOSIZE);
 	//namedWindow("OpenCV with pyramids optical flow", WINDOW_AUTOSIZE);
@@ -131,7 +131,7 @@ int main()
 	imshow("OpenCV optical flow", dataOpencv.flow_viz);
 	//imshow("OpenCV with pyramids optical flow", dataOpencvPyr.flow_viz);
 	waitKey();
-
+*/
 	strcpy(firstImg, (*image_files).c_str());
 	image_files++;
 	ground_truth_files++;

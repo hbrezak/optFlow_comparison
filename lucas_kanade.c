@@ -241,7 +241,7 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 
 				// Check if we exceeded the treshold CHANGED made this better for 0.03
 				if ((abs(step_x) + abs(step_y)) < (step_threshold*(subpixel_factor/100))) {
-					//printf("step x %d and step threshold %u \n", step_x, (step_threshold*(subpixel_factor/100)));
+					//printf("step x %ld and step threshold %u \n", step_x, (step_threshold*(subpixel_factor/100)));
 					break;
 				}
 

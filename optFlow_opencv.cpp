@@ -24,7 +24,7 @@ using namespace std;
 void optFlow_opencv(char* curImagePath, char* nextImagePath, char* groundTruthPath, const vector<Point2f>& currPoints, int pyrLevel, flowResults& results )
 {
 	TermCriteria termcrit(TermCriteria::COUNT | TermCriteria::EPS, 20, 0.03);
-	Size subPixWinSize(10, 10), winSize(31, 31);
+	Size subPixWinSize(10, 10), winSize(31,31);
 	vector<Point2f> nextPoints; //typedef Point_<float> Point2f;
 	//REMEMBER! currPoints.x == width == columns; currPoints.y == height == rows;
 	vector<uchar> status;
