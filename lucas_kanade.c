@@ -82,17 +82,6 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 	pyramid_build(old_img, pyramid_old, pyramid_level);
 	pyramid_build(new_img, pyramid_new, pyramid_level);
 
-	/*uint8_t show_level = pyramid_level;
-	uint8_t *buff_pointer = (uint8_t *)pyramid_old[show_level].buf;
-	printf("\nPyramid level %d \n", show_level);
-	for (uint16_t j = 0; j != (pyramid_old[show_level].w * pyramid_old[show_level].h); j++){
-		printf("%4d ", *buff_pointer++);
-		if (!((j+1)%pyramid_old[show_level].w))
-			printf("\n");
-	}
-	printf("width %u, height %u \n", pyramid_old[show_level].w, pyramid_old[show_level].h);
-	*/
-
 	// determine patch sizes and initialize neighborhoods
 	uint16_t patch_size = 2 * half_window_size + 1; //CHANGED to put pixel in center, doesnt seem to impact results much, keep in mind.
 	uint32_t error_threshold = (25 * 25) * (patch_size * patch_size);
@@ -115,32 +104,28 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 
 		//printf("Pyramid level %d \n", LVL);
 
-		//printf("max p %u, orig p %u, p_cnt %u \n", max_points, 0, *points_cnt);
 		uint16_t points_orig = *points_cnt;
 		*points_cnt = 0;
-		//printf("max p %u, orig p %u, p_cnt %u \n", max_points, points_orig, *points_cnt);
-		//new_p, points_cnt are related to number of points, wont overflow
+		uint16_t new_p = 0;
 
-		// Calculate the amount of points to skip
+		// Calculate the amount of points to skip - disabled until needed
 		//float skip_points =	(points_orig > max_points) ? points_orig / max_points : 1;
 		//printf("\nBased on max_points input, I'm skipping %f points(1 == none). \n", skip_points); //ADDED
 		//CONC : I don't want to skip any points and result of skip_points is then appropriate
-		uint16_t new_p = 0;
+
 		// Go through all points
-		for (uint16_t i = 0; i < max_points && i < points_orig; i++) {
+		for (uint16_t i = 0; i < max_points && i < points_orig; i++)
+		{
+			//uint16_t p = i ;//* skip_points; - disabled until needed
 
-			//uint16_t p = i ;//* skip_points;
-
-
-
-			if (LVL == pyramid_level){
-
+			if (LVL == pyramid_level)
+			{
 				// Convert the point to a subpixel coordinate
 				vectors[new_p].pos.x = (points[i].x * subpixel_factor) / exp; //this overflows for s_f = 1000; change point_t pos
 				vectors[new_p].pos.y = (points[i].y * subpixel_factor) / exp; //this overflows for s_f = 1000; change point_t pos
 				vectors[new_p].flow_x = 0;
 				vectors[new_p].flow_y = 0;
-				//printf("Convert point %u %u to subpix: %u, %u \n", points[p].x, points[p].y, vectors[new_p].pos.x,  vectors[new_p].pos.y);
+				//printf("Convert point %u %u to subpix: %u, %u \n", points[i].x, points[i].y, vectors[new_p].pos.x,  vectors[new_p].pos.y);
 
 				//printf("%u x %u, pos y %u, flowx %d, flowy %d \n", i, vectors[new_p].pos.x, vectors[new_p].pos.y,vectors[new_p].flow_x, vectors[new_p].flow_y );
 
@@ -153,6 +138,7 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 					//CONC: consistent in not tracking edge features
 					continue;
 				}
+
 			} else {
 				// Convert last pyramid level flow into this pyramid level flow guess
 				//printf("2nd pyr lvl: pos x %u, flow x %d \n", vectors[new_p].pos.x, vectors[new_p].flow_x);
@@ -192,26 +178,25 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 
 			// Check if the determinant is bigger than 1
 			if (Det < (0.0005*subpixel_factor)) {
-				//printf("Determinant smaller than 1 for %u %u, i = %u\n", vectors[new_p].pos.x/subpixel_factor, vectors[new_p].pos.y/subpixel_factor, i); //ADDED
-				//printf("Members %d * %d - %d * %d \n", G[0],G[3],G[1],G[2]);
-				//printf("Determinanta prava: %f \n",((float)G[0] * G[3] - G[1] * G[2])/ subpixel_factor);
-				//printf("Determinanta: %d \n", Det);
 				continue;
 			}
 
 			// (4) iterate over taking steps in the image to minimize the error:
 			bool_t tracked = TRUE;
+
 			for (uint8_t it = 0; it < max_iterations; it++) {
 				struct point_t new_point = { vectors[new_p].pos.x  + vectors[new_p].flow_x,
 											 vectors[new_p].pos.y + vectors[new_p].flow_y };
 				// If the pixel is outside ROI, do not track it
 				if (new_point.x / subpixel_factor < half_window_size || (pyramid_new[LVL].w - new_point.x / subpixel_factor) < half_window_size
-						|| new_point.y / subpixel_factor < half_window_size || (pyramid_new[LVL].h - new_point.y / subpixel_factor)< half_window_size) {
+						|| new_point.y / subpixel_factor < half_window_size || (pyramid_new[LVL].h - new_point.y / subpixel_factor)< half_window_size)
+				{
 					tracked = FALSE;
 					//printf("*New point outside ROI %u, %u; window size w %u h %u \n",
 					//		new_point.x /subpixel_factor, new_point.y/subpixel_factor, pyramid_new[LVL].w, pyramid_new[LVL].h); //ADDED
 					break;
 				}
+
 
 				//     [a] get the subpixel neighborhood in the new image
 				image_subpixel_window(&pyramid_new[LVL], &window_J, &new_point, subpixel_factor);
@@ -228,11 +213,14 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 				int32_t b_x = image_multiply(&window_diff, &window_DX, NULL) / 255;
 				int32_t b_y = image_multiply(&window_diff, &window_DY, NULL) / 255;
 
+
 				//     [d] calculate the additional flow step and possibly terminate the iteration
-				int64_t step_x = (( (int64_t) G[3] * b_x - G[1] * b_y) * subpixel_factor) / Det; //CHANGED 16 -> 32; changes made so DET is in subpixel now (less point rejection)
-				int64_t step_y = (( (int64_t) G[0] * b_y - G[2] * b_x) * subpixel_factor) / Det; //CHANGED 16 -> 32; possibly change subpx factor and then this datatype to 32
-				//printf("step x %ld step y %ld \n", step_x, step_y);
+				int32_t step_x = (( (int64_t) G[3] * b_x - G[1] * b_y) * subpixel_factor) / Det; //CHANGED 16 -> 32; changes made so DET is in subpixel now (less point rejection)
+				int32_t step_y = (( (int64_t) G[0] * b_y - G[2] * b_x) * subpixel_factor) / Det; //CHANGED 16 -> 32; possibly change subpx factor and then this datatype to 32
+				//printf("step x %d step y %d \n", step_x, step_y);
 				//printf("is it large? %ld \n", (((int64_t)G[3] * b_x - G[1] * b_y)*subpixel_factor));
+
+
 				vectors[new_p].flow_x += step_x;
 				vectors[new_p].flow_y += step_y;
 				//printf("suma flow x %d  flow y %d \n",vectors[new_p].flow_x, vectors[new_p].flow_y);
@@ -244,9 +232,7 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 					//printf("step x %ld and step threshold %u \n", step_x, (step_threshold*(subpixel_factor/100)));
 					break;
 				}
-
-
-			}
+			} // lucas kanade step iteration
 
 			// If we tracked the point we update the index and the count
 			if (tracked) {
@@ -272,3 +258,14 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 	// Return the vectors
 	return vectors;
 }
+
+/*uint8_t show_level = pyramid_level;
+uint8_t *buff_pointer = (uint8_t *)pyramid_old[show_level].buf;
+printf("\nPyramid level %d \n", show_level);
+for (uint16_t j = 0; j != (pyramid_old[show_level].w * pyramid_old[show_level].h); j++){
+	printf("%4d ", *buff_pointer++);
+	if (!((j+1)%pyramid_old[show_level].w))
+		printf("\n");
+}
+printf("width %u, height %u \n", pyramid_old[show_level].w, pyramid_old[show_level].h);
+*/

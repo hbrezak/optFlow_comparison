@@ -19,6 +19,6 @@
 #include <vector>
 #include "opencv2/core.hpp"
 
-void optFlow_opencv(char*, char*, char*, const std::vector<cv::Point2f>&, int pyrLevel, flowResults&);
+void optFlow_opencv(const char*, const char*, const char*, const std::vector<cv::Point2f>&, int pyrLevel, flowResults&);
 
 #endif /* OPTFLOW_OPENCV_H_ */
