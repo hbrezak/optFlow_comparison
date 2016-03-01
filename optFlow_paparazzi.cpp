@@ -93,12 +93,12 @@ void optFlow_paparazzi(const char* curImagePath, const char* nextImagePath, cons
 	// Go through all the points
 	for (uint16_t i = 0; i < numTracked; i++) {
 		//because opticalFlowLK leaves out some corners
-		var.pos.x = float(vectors[i].pos.x) / subpixel_factor;
-		var.pos.y = float(vectors[i].pos.y) / subpixel_factor;
+		var.pos.x = vectors[i].pos.x / subpixel_factor;
+		var.pos.y = vectors[i].pos.y / subpixel_factor;
 		var.flow_x = float(vectors[i].flow_x) / subpixel_factor;
 		var.flow_y = float(vectors[i].flow_y) / subpixel_factor;
 		lk_flow.push_back(var);
-		//cout << var.pos.x << " " << var.pos.y << endl;
+		//cout << var.flow_x << " " << var.flow_y << endl;
 	}
 
 /*

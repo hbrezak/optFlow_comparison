@@ -121,7 +121,7 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 			if (LVL == pyramid_level)
 			{
 				// Convert the point to a subpixel coordinate
-				vectors[new_p].pos.x = (points[i].x * subpixel_factor) / exp; //this overflows for s_f = 1000; change point_t pos
+				vectors[new_p].pos.x = (points[i].x * subpixel_factor) / exp; // vectors[new_p].pos.x = (points[i].x * subpixel_factor)/ (1<<pyramid_level);
 				vectors[new_p].pos.y = (points[i].y * subpixel_factor) / exp; //this overflows for s_f = 1000; change point_t pos
 				vectors[new_p].flow_x = 0;
 				vectors[new_p].flow_y = 0;
@@ -217,6 +217,7 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 				//     [d] calculate the additional flow step and possibly terminate the iteration
 				int32_t step_x = (( (int64_t) G[3] * b_x - G[1] * b_y) * subpixel_factor) / Det; //CHANGED 16 -> 32; changes made so DET is in subpixel now (less point rejection)
 				int32_t step_y = (( (int64_t) G[0] * b_y - G[2] * b_x) * subpixel_factor) / Det; //CHANGED 16 -> 32; possibly change subpx factor and then this datatype to 32
+				// Converting step into subpixel directly instead via Det ensures less good points rejection; memory impact?
 				//printf("step x %d step y %d \n", step_x, step_y);
 				//printf("is it large? %ld \n", (((int64_t)G[3] * b_x - G[1] * b_y)*subpixel_factor));
 
