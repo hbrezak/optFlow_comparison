@@ -86,6 +86,7 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 	uint16_t patch_size = 2 * half_window_size + 1; //CHANGED to put pixel in center, doesnt seem to impact results much, keep in mind.
 	uint32_t error_threshold = (25 * 25) * (patch_size * patch_size);
 	uint16_t padded_patch_size = patch_size + 2;
+	step_threshold = step_threshold*(subpixel_factor/100);
 	// 3 values related to tracking window size, wont overflow
 
 	// Create the window images
@@ -96,9 +97,6 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 	image_create(&window_DY, patch_size, patch_size, IMAGE_GRADIENT);
 	image_create(&window_diff, patch_size, patch_size, IMAGE_GRADIENT);
 
-	uint8_t exp = 1;
-	for (uint8_t k = 0; k != pyramid_level; k++)
-			exp *= 2;
 
 	for (int8_t LVL = pyramid_level; LVL != -1; LVL--) {
 
@@ -121,8 +119,8 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 			if (LVL == pyramid_level)
 			{
 				// Convert the point to a subpixel coordinate
-				vectors[new_p].pos.x = (points[i].x * subpixel_factor) / exp; // vectors[new_p].pos.x = (points[i].x * subpixel_factor)/ (1<<pyramid_level);
-				vectors[new_p].pos.y = (points[i].y * subpixel_factor) / exp; //this overflows for s_f = 1000; change point_t pos
+				vectors[new_p].pos.x = (points[i].x * subpixel_factor) >> pyramid_level; // use bitwise shift for division
+				vectors[new_p].pos.y = (points[i].y * subpixel_factor) >> pyramid_level;
 				vectors[new_p].flow_x = 0;
 				vectors[new_p].flow_y = 0;
 				//printf("Convert point %u %u to subpix: %u, %u \n", points[i].x, points[i].y, vectors[new_p].pos.x,  vectors[new_p].pos.y);
@@ -143,10 +141,10 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 				// Convert last pyramid level flow into this pyramid level flow guess
 				//printf("2nd pyr lvl: pos x %u, flow x %d \n", vectors[new_p].pos.x, vectors[new_p].flow_x);
 
-				vectors[new_p].pos.x = 2 * vectors[i].pos.x;
-				vectors[new_p].pos.y = 2 * vectors[i].pos.y;
-				vectors[new_p].flow_x = 2 * vectors[i].flow_x;
-				vectors[new_p].flow_y = 2 * vectors[i].flow_y;
+				vectors[new_p].pos.x = vectors[i].pos.x << 1;
+				vectors[new_p].pos.y = vectors[i].pos.y << 1;
+				vectors[new_p].flow_x = vectors[i].flow_x << 1;
+				vectors[new_p].flow_y = vectors[i].flow_y << 1;
 
 				//printf("%u x %u, pos y %u, flowx %d, flowy %d \n", i, vectors[new_p].pos.x, vectors[new_p].pos.y,vectors[new_p].flow_x, vectors[new_p].flow_y );
 				//sleep(1);
@@ -177,14 +175,14 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 			//printf("Determinanta prava: %f \n",((float)G[0] * G[3] - G[1] * G[2])/ subpixel_factor);
 
 			// Check if the determinant is bigger than 1
-			if (Det < (0.0005*subpixel_factor)) {
+			if (Det < 1) {
 				continue;
 			}
 
 			// (4) iterate over taking steps in the image to minimize the error:
 			bool_t tracked = TRUE;
 
-			for (uint8_t it = 0; it < max_iterations; it++) {
+			for (uint8_t it = max_iterations; it--; ) {
 				struct point_t new_point = { vectors[new_p].pos.x  + vectors[new_p].flow_x,
 											 vectors[new_p].pos.y + vectors[new_p].flow_y };
 				// If the pixel is outside ROI, do not track it
@@ -204,7 +202,7 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 				//     [b] determine the image difference between the two neighborhoods
 				uint32_t error = image_difference(&window_I, &window_J, &window_diff);
 
-				if (error > error_threshold && it > max_iterations / 2) {
+				if (error > error_threshold && it < max_iterations / 2) {
 					tracked = FALSE;
 					//bprintf("*Error larger than error treshold for %d %d \n", vectors[new_p].pos.x/subpixel_factor, vectors[new_p].pos.y/subpixel_factor); //ADDED
 					break;
@@ -222,14 +220,14 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 				//printf("is it large? %ld \n", (((int64_t)G[3] * b_x - G[1] * b_y)*subpixel_factor));
 
 
-				vectors[new_p].flow_x += step_x;
-				vectors[new_p].flow_y += step_y;
+				vectors[new_p].flow_x = vectors[new_p].flow_x + step_x;
+				vectors[new_p].flow_y = vectors[new_p].flow_y + step_y;
 				//printf("suma flow x %d  flow y %d \n",vectors[new_p].flow_x, vectors[new_p].flow_y);
 
 				//printf("Flows: %d %d \n", vectors[new_p].flow_x, vectors[new_p].flow_x);
 
 				// Check if we exceeded the treshold CHANGED made this better for 0.03
-				if ((abs(step_x) + abs(step_y)) < (step_threshold*(subpixel_factor/100))) {
+				if ((abs(step_x) + abs(step_y)) < step_threshold) {
 					//printf("step x %ld and step threshold %u \n", step_x, (step_threshold*(subpixel_factor/100)));
 					break;
 				}

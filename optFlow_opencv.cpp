@@ -52,16 +52,19 @@ void optFlow_opencv(const char* curImagePath, const char* nextImagePath, const c
 	/*cout << endl;
 	cout << "OpenCV tracked points(column -- row) " << endl;
 	cout << "Total number of points: "<< currPoints.size() << endl;*/
+	double min, max;
+	minMaxLoc(err, &min, &max);
+	double error_threshold = max / 4;
 
 	for (vector<Point2f>::size_type i = 0; i!= currPoints.size(); i++){
 		//cout << currPoints[i].y << "--" << currPoints[i].x << "        " << nextPoints[i].y << "--" << nextPoints[i].x << endl;
-		//if (err[i] < 10){ // comment out this if command if you want whole output. this uses errors that calcLK provides to
+		if (err[i] < error_threshold){ // comment out this if command if you want whole output. this uses errors that calcLK provides to
 			//get rid of high error results
 		var.pos.x = currPoints[i].x;
 		var.pos.y = currPoints[i].y;
 		var.flow_x = nextPoints[i].x - currPoints[i].x;
 		var.flow_y = nextPoints[i].y - currPoints[i].y;
-		lk_flow.push_back(var);//}
+		lk_flow.push_back(var);}
 		//cout << var.pos.x << " " << var.pos.y << endl;
 	}
 /*
