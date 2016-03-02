@@ -118,6 +118,11 @@ void optFlow_paparazzi(const char* curImagePath, const char* nextImagePath, cons
 	//Vizualise calculated optical flow with arrow field
 	results.flow_viz = showFlow(curImg, nextImg, curImagePath, lk_flow);
 
+
+	image_free(&nextGray);
+	image_free(&curGray);
+	image_free(&nextYUV);
+	image_free(&curYUV);
 }
 
 /**

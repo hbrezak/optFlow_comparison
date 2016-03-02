@@ -29,7 +29,6 @@
 #include <string.h>
 #include <stdio.h> //ADDED
 
-
 /**
  * Create a new image
  * @param[out] *img The output image
@@ -43,7 +42,6 @@ void image_create(struct image_t *img, uint16_t width, uint16_t height, enum ima
   img->type = type;
   img->w = width;
   img->h = height;
-
 
   // Depending on the type the size differs
   if (type == IMAGE_YUV422) {
@@ -321,6 +319,8 @@ void pyramid_next_level(struct image_t *input, struct image_t *output)
 			output_buf[i*output->w + j] = round(sum);
 		}
 	}
+
+	image_free(&padded);
 }
 
 
@@ -335,12 +335,9 @@ void pyramid_build(struct image_t *input, struct image_t *output_array, uint8_t 
 	image_create(&output_array[0], input->w, input->h, input->type);
 	image_copy(input, &output_array[0]);
 
-	for (uint8_t i = 1; i!=pyr_level + 1; i++)
+	for (uint8_t i = 1; i != pyr_level + 1; i++)
 		pyramid_next_level(&output_array[i-1], &output_array[i]);
-
 }
-
-
 
 
 /**
@@ -352,11 +349,9 @@ void pyramid_build(struct image_t *input, struct image_t *output_array, uint8_t 
  * @param[in] *center Center point in subpixel coordinates
  * @param[in] subpixel_factor The subpixel factor per pixel
  */
-
 void image_subpixel_window(struct image_t *input, struct image_t *output, struct point_t *center, uint32_t subpixel_factor)
 {
 	// first call: image_subpixel_window(old_img, &window_I, &vectors[new_p].pos, subpixel_factor);
-
   uint8_t *input_buf = (uint8_t *)input->buf; //contains original gray image values in range 0-255
   uint8_t *output_buf = (uint8_t *)output->buf;
 
@@ -438,8 +433,6 @@ void image_subpixel_window(struct image_t *input, struct image_t *output, struct
  */
 void image_gradients(struct image_t *input, struct image_t *dx, struct image_t *dy)
 {
-	//image_gradients(&window_I, &window_DX, &window_DY);
-
   // Fetch the buffers in the correct format
   uint8_t *input_buf = (uint8_t *)input->buf;
   int16_t *dx_buf = (int16_t *)dx->buf;
@@ -464,7 +457,6 @@ void image_gradients(struct image_t *input, struct image_t *dx, struct image_t *
  */
 void image_calculate_g(struct image_t *dx, struct image_t *dy, int32_t *g)
 {
-	//image_calculate_g(&window_DX, &window_DY, G);
   int32_t sum_dxx = 0, sum_dxy = 0, sum_dyy = 0;
 
   // Fetch the buffers in the correct format
@@ -477,7 +469,6 @@ void image_calculate_g(struct image_t *dx, struct image_t *dy, int32_t *g)
       sum_dxx += ((int32_t)dx_buf[y * dx->w + x] * dx_buf[y * dx->w + x]);
       sum_dxy += ((int32_t)dx_buf[y * dx->w + x] * dy_buf[y * dy->w + x]);
       sum_dyy += ((int32_t)dy_buf[y * dy->w + x] * dy_buf[y * dy->w + x]);
-
     }
   }
   //printf("sum_dxx squared: %d dim are %u %u \n", sum_dxx, dx->w, dy->h); // u razini 100 000
@@ -518,7 +509,6 @@ uint32_t image_difference(struct image_t *img_a, struct image_t *img_b, struct i
     for (uint16_t y = 0; y < img_b->h; y++) {
       int16_t diff_c = img_a_buf[(y + 1) * img_a->w + (x + 1)] - img_b_buf[y * img_b->w + x]; //oduzima 2 vrijednosti <-510 - 510 >
       sum_diff2 += diff_c * diff_c; // za s_f 1000 max vrijednost 500*500*15*15 < 100 mil
-
 
       // Set the difference image
       if (diff_buf != NULL) {
