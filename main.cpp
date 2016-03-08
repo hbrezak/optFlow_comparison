@@ -9,7 +9,7 @@
 
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/video/video.hpp"
-#include<sstream>
+#include <sstream>
 
 #include "read_dir_contents.h"
 #include "optFlow_opencv.h"
@@ -31,14 +31,15 @@ int main()
 	vector<string> *image_filenames;
 	vector<string> *ground_truth_filenames;
 
-	image_filenames = listdir("/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSequence3/images");
-	ground_truth_filenames = listdir("/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSequence3/ground_truth");
-	string output_dir = "/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSequence3/output";
+	image_filenames = listdir("/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSequence4/images");
+	ground_truth_filenames = listdir("/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSequence4/ground_truth");
+	string output_dir = "/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSequence4/output";
 
 	//Initalize some constants and parameters
 	vector<string>::const_iterator ground_truth_file = ground_truth_filenames->begin() + 2;
 	int frame = 1;
-	const int MAX_POINTS = 150;
+	const int MAX_POINTS = 250;
+
 
 	// Iterate through image files and calculate optical flow
 	for (vector<string>::const_iterator image_file = image_filenames->begin() + 2; image_file != (image_filenames->end() - 1); image_file++)
@@ -71,7 +72,7 @@ int main()
 
 		// Calculate flow
 		optFlow_paparazzi(first_image, second_image, ground_truth, points, dataPaparazzi);
-		//optFlow_opencv(first_image, second_image, ground_truth, points, 2, dataOpencv);
+		optFlow_opencv(first_image, second_image, ground_truth, points, 0, dataOpencv);
 
 		// Output flow to console
 		cout << endl;
@@ -83,26 +84,26 @@ int main()
 		cout << "Average angular error: " << dataPaparazzi.angErr << endl;
 		cout << "Time passed in miliseconds: " << dataPaparazzi.time << endl;
 
-		/*cout << endl;
+		cout << endl;
 		cout << "OpenCV results: " << endl;
 		cout << "Number of points left: " << dataOpencv.points_left << endl;
 		cout << "Average magnitude error: " << dataOpencv.magErr << endl;
 		cout << "Average angular error: " << dataOpencv.angErr << endl;
 		cout << "Time passed in miliseconds: " << dataOpencv.time << endl;
-		cout << "=====================================================" << endl;*/
+		cout << "=====================================================" << endl;
 
 		// Illustrate optical flow
-		namedWindow("Paparazzi optical flow", WINDOW_AUTOSIZE);
-		//namedWindow("OpenCV optical flow", WINDOW_AUTOSIZE);
+		/*namedWindow("Paparazzi optical flow", WINDOW_AUTOSIZE);
+		namedWindow("OpenCV optical flow", WINDOW_AUTOSIZE);
 		imshow("Paparazzi optical flow", dataPaparazzi.flow_viz);
-		//imshow("OpenCV optical flow", dataOpencv.flow_viz);
-		waitKey();
+		imshow("OpenCV optical flow", dataOpencv.flow_viz);
+		waitKey();*/
 
 
-		save_path << output_dir << "/paparazzi/flow_" << frame -1 << type;
+		/*save_path << output_dir << "/paparazzi/flow_" << frame -1 << type;
 		string filename = save_path.str();
 		imwrite(filename, dataPaparazzi.flow_viz);
-		save_path.str("");
+		save_path.str("");*/
 
 //		save_path << output_dir << "/opencv/flow_" << frame - 1 << type;
 //		filename = save_path.str();
