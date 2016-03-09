@@ -84,7 +84,7 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 
 	// determine patch sizes and initialize neighborhoods
 	uint16_t patch_size = 2 * half_window_size + 1; //CHANGED to put pixel in center, doesnt seem to impact results much, keep in mind.
-	uint32_t error_threshold = (25 * 25) * (patch_size * patch_size);
+	uint32_t error_threshold = (10 * 10) * (patch_size * patch_size);
 	uint16_t padded_patch_size = patch_size + 2;
 	step_threshold = step_threshold*(subpixel_factor/100);
 	// 3 values related to tracking window size, wont overflow
@@ -129,8 +129,8 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 
 
 				// If the pixel is outside ROI, do not track it
-				if (vectors[new_p].pos.x/subpixel_factor < half_window_size || (pyramid_old[LVL].w - vectors[new_p].pos.x/subpixel_factor) < half_window_size
-										|| vectors[new_p].pos.y/subpixel_factor < half_window_size || (pyramid_old[LVL].h - vectors[new_p].pos.y/subpixel_factor) < half_window_size) {
+				if (vectors[new_p].pos.x/subpixel_factor < 0 || (pyramid_old[LVL].w -6 - vectors[new_p].pos.x/subpixel_factor) < half_window_size
+										|| vectors[new_p].pos.y/subpixel_factor < 0 || (pyramid_old[LVL].h -6 - vectors[new_p].pos.y/subpixel_factor) < half_window_size) {
 					printf("Input feature outside ROI %u, %u ; image size: %u %u\n", vectors[new_p].pos.x/subpixel_factor, vectors[new_p].pos.y/subpixel_factor,
 							pyramid_old[LVL].w, pyramid_old[LVL].h); //ADDED
 					//CONC: consistent in not tracking edge features
@@ -150,8 +150,8 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 				//sleep(1);
 
 				// If the pixel is outside ROI, do not track it
-				if (vectors[new_p].pos.x/subpixel_factor < half_window_size || (pyramid_old[LVL].w - vectors[new_p].pos.x/subpixel_factor) < half_window_size
-						|| vectors[new_p].pos.y/subpixel_factor < half_window_size || (pyramid_old[LVL].h - vectors[new_p].pos.y/subpixel_factor) < half_window_size) {
+				if (vectors[new_p].pos.x/subpixel_factor < 0 || (pyramid_old[LVL].w-6 - vectors[new_p].pos.x/subpixel_factor) < half_window_size
+						|| vectors[new_p].pos.y/subpixel_factor < 0 || (pyramid_old[LVL].h-6 - vectors[new_p].pos.y/subpixel_factor) < half_window_size) {
 					printf("V2 Input feature outside ROI %u, %u \n",vectors[new_p].pos.x/subpixel_factor, vectors[new_p].pos.y); //ADDED
 					//CONC: consistent in not tracking edge features
 					continue;
@@ -187,8 +187,8 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 				struct point_t new_point = { vectors[new_p].pos.x  + vectors[new_p].flow_x,
 											 vectors[new_p].pos.y + vectors[new_p].flow_y };
 				// If the pixel is outside ROI, do not track it
-				if (new_point.x / subpixel_factor < half_window_size || (pyramid_new[LVL].w - new_point.x / subpixel_factor) < half_window_size
-						|| new_point.y / subpixel_factor < half_window_size || (pyramid_new[LVL].h - new_point.y / subpixel_factor)< half_window_size)
+				if (new_point.x / subpixel_factor < 0 || (pyramid_new[LVL].w -6- new_point.x / subpixel_factor) < half_window_size
+						|| new_point.y / subpixel_factor < 0 || (pyramid_new[LVL].h -6- new_point.y / subpixel_factor)< half_window_size)
 				{
 					tracked = FALSE;
 					printf("*New point outside ROI %u, %u; window size w %u h %u \n",
