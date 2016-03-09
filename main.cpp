@@ -31,9 +31,9 @@ int main()
 	vector<string> *image_filenames;
 	vector<string> *ground_truth_filenames;
 
-	image_filenames = listdir("/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSequence4/images");
-	ground_truth_filenames = listdir("/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSequence4/ground_truth");
-	string output_dir = "/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSequence4/output";
+	image_filenames = listdir("/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSequence2/images");
+	ground_truth_filenames = listdir("/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSequence2/ground_truth");
+	string output_dir = "/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSequence2/output";
 
 	//Initalize some constants and parameters
 	vector<string>::const_iterator ground_truth_file = ground_truth_filenames->begin() + 2;
@@ -72,7 +72,7 @@ int main()
 
 		// Calculate flow
 		optFlow_paparazzi(first_image, second_image, ground_truth, points, dataPaparazzi);
-		optFlow_opencv(first_image, second_image, ground_truth, points, 0, dataOpencv);
+		optFlow_opencv(first_image, second_image, ground_truth, points, 2, dataOpencv);
 
 		// Output flow to console
 		cout << endl;
@@ -93,11 +93,11 @@ int main()
 		cout << "=====================================================" << endl;
 
 		// Illustrate optical flow
-		/*namedWindow("Paparazzi optical flow", WINDOW_AUTOSIZE);
+		namedWindow("Paparazzi optical flow", WINDOW_AUTOSIZE);
 		namedWindow("OpenCV optical flow", WINDOW_AUTOSIZE);
 		imshow("Paparazzi optical flow", dataPaparazzi.flow_viz);
 		imshow("OpenCV optical flow", dataOpencv.flow_viz);
-		waitKey();*/
+		waitKey();
 
 
 		/*save_path << output_dir << "/paparazzi/flow_" << frame -1 << type;
