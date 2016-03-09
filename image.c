@@ -378,7 +378,7 @@ void image_subpixel_window(struct image_t *input, struct image_t *output, struct
       // Calculate the subpixel coordinate
       uint32_t x = center->x + 6 * subpixel_factor + (i - half_window) * subpixel_factor ;
       uint32_t y = center->y + 6 * subpixel_factor + (j - half_window) * subpixel_factor ; // sums 32bit ints, CHANGED 16 -> 32
-      printf("Calc. the subpixel coord. at %u %u for pixel %u %u - x %u  y %u \n", i, j,center->x,center->y, x, y);
+      //printf("Calc. the subpixel coord. at %u %u for pixel %u %u - x %u  y %u \n", i, j,center->x,center->y, x, y);
       // after 16 -> 32, scanning through window works great
       BoundUpper(x, subpixel_w-6);
       BoundUpper(y, subpixel_h-6);
