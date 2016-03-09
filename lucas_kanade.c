@@ -128,15 +128,15 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 
 				//printf("%u x %u, pos y %u, flowx %d, flowy %d \n", i, vectors[new_p].pos.x, vectors[new_p].pos.y,vectors[new_p].flow_x, vectors[new_p].flow_y );
 
-
-				// If the pixel is outside ROI, do not track it
+				// Now impossible?
+				/*// If the pixel is outside ROI, do not track it
 				if (vectors[new_p].pos.x/subpixel_factor < 0 || (pyramid_old[LVL].w -6 - vectors[new_p].pos.x/subpixel_factor) < half_window_size
 										|| vectors[new_p].pos.y/subpixel_factor < 0 || (pyramid_old[LVL].h -6 - vectors[new_p].pos.y/subpixel_factor) < half_window_size) {
 					printf("Input feature outside ROI %u, %u ; image size: %u %u\n", vectors[new_p].pos.x/subpixel_factor, vectors[new_p].pos.y/subpixel_factor,
 							pyramid_old[LVL].w, pyramid_old[LVL].h); //ADDED
 					//CONC: consistent in not tracking edge features
 					continue;
-				}
+				}*/
 
 			} else {
 				// Convert last pyramid level flow into this pyramid level flow guess
@@ -150,13 +150,14 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 				//printf("%u x %u, pos y %u, flowx %d, flowy %d \n", i, vectors[new_p].pos.x, vectors[new_p].pos.y,vectors[new_p].flow_x, vectors[new_p].flow_y );
 				//sleep(1);
 
-				// If the pixel is outside ROI, do not track it
+				//Now impossible?
+				/*// If the pixel is outside ROI, do not track it
 				if (vectors[new_p].pos.x/subpixel_factor < 0 || (pyramid_old[LVL].w-6 - vectors[new_p].pos.x/subpixel_factor) < half_window_size
 						|| vectors[new_p].pos.y/subpixel_factor < 0 || (pyramid_old[LVL].h-6 - vectors[new_p].pos.y/subpixel_factor) < half_window_size) {
 					printf("V2 Input feature outside ROI %u, %u \n",vectors[new_p].pos.x/subpixel_factor, vectors[new_p].pos.y); //ADDED
 					//CONC: consistent in not tracking edge features
 					continue;
-				}
+				}*/
 			}
 
 			// (1) determine the subpixel neighborhood in the old image
@@ -188,8 +189,11 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 				struct point_t new_point = { vectors[new_p].pos.x  + vectors[new_p].flow_x,
 											 vectors[new_p].pos.y + vectors[new_p].flow_y };
 				// If the pixel is outside ROI, do not track it
-				if (new_point.x / subpixel_factor < 0 || (pyramid_new[LVL].w -6- new_point.x / subpixel_factor) < half_window_size
-						|| new_point.y / subpixel_factor < 0 || (pyramid_new[LVL].h -6- new_point.y / subpixel_factor)< half_window_size)
+				if ( ((int32_t)vectors[new_p].pos.x  + vectors[new_p].flow_x) < 0
+						|| (new_point.x / subpixel_factor) > (pyramid_new[LVL].w - 2 * border_size)
+						//|| ((int16_t)pyramid_new[LVL].w - 2 * border_size - new_point.x / subpixel_factor) < 0
+						|| ((int32_t)vectors[new_p].pos.y  + vectors[new_p].flow_y) < 0
+						|| (new_point.y / subpixel_factor) > (pyramid_new[LVL].h - 2 * border_size))
 				{
 					tracked = FALSE;
 					printf("*New point outside ROI %u, %u; window size w %u h %u \n",
