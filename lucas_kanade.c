@@ -188,16 +188,19 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 			for (uint8_t it = max_iterations; it--; ) {
 				struct point_t new_point = { vectors[new_p].pos.x  + vectors[new_p].flow_x,
 											 vectors[new_p].pos.y + vectors[new_p].flow_y };
+
+
 				// If the pixel is outside ROI, do not track it
-				if ( ((int32_t)vectors[new_p].pos.x  + vectors[new_p].flow_x) < 0
-						|| (new_point.x / subpixel_factor) > (pyramid_new[LVL].w - 2 * border_size)
-						//|| ((int16_t)pyramid_new[LVL].w - 2 * border_size - new_point.x / subpixel_factor) < 0
-						|| ((int32_t)vectors[new_p].pos.y  + vectors[new_p].flow_y) < 0
-						|| (new_point.y / subpixel_factor) > (pyramid_new[LVL].h - 2 * border_size))
+				if ( (((int32_t)vectors[new_p].pos.x  + vectors[new_p].flow_x) < 0)
+						|| ((new_point.x / subpixel_factor) > (pyramid_new[LVL].w - 2*border_size))
+						|| (((int32_t)vectors[new_p].pos.y  + vectors[new_p].flow_y) < 0)
+						|| ((new_point.y / subpixel_factor) > (pyramid_new[LVL].h - 2*border_size)) )
 				{
 					tracked = FALSE;
-					printf("*New point outside ROI %u, %u; window size w %u h %u \n",
-							new_point.x /subpixel_factor, new_point.y/subpixel_factor, pyramid_new[LVL].w, pyramid_new[LVL].h); //ADDED
+					printf("*New point outside ROI %d, %d; window size w %u h %u \n",
+							((int32_t)vectors[new_p].pos.x  + vectors[new_p].flow_x),
+							((int32_t)vectors[new_p].pos.y  + vectors[new_p].flow_y),
+							pyramid_new[LVL].w,	pyramid_new[LVL].h); //ADDED
 					break;
 				}
 
