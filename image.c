@@ -294,8 +294,8 @@ void pyramid_next_level(struct image_t *input, struct image_t *output)
 	for (uint16_t i = 0; i != output->h; i++){
 
 		for (uint16_t j = 0; j != output->w; j++){
-			row = 2 + 2 * i;
-			col = 2 + 2 * j;
+			row = 6 + 2 * i;
+			col = 6 + 2 * j;
 			/*output_buf[i*output->w + j] = round(0.0039*input_buf[(2+2*i -2)*input->w + (2+2*j -2)] + 1.0/64*input_buf[(2+2*i -2)*input->w + (2+2*j -1)] +
 					3.0/128*input_buf[(2+2*i -2)*input->w + (2+2*j)] + 1.0/64*input_buf[(2+2*i -2)*input->w + (2+2*j +1)] + 0.0039*input_buf[(2+2*i -2)*input->w + (2+2*j +2)] +
 					1.0/64*input_buf[(2+2*i -1)*input->w + (2+2*j -2)] + 1.0/16*input_buf[(2+2*i -1)*input->w + (2+2*j -1)] + 3.0/32*input_buf[(2+2*i -1)*input->w + (2+2*j)] +
@@ -378,7 +378,7 @@ void image_subpixel_window(struct image_t *input, struct image_t *output, struct
       // Calculate the subpixel coordinate
       uint32_t x = center->x + 6 * subpixel_factor + (i - half_window) * subpixel_factor ;
       uint32_t y = center->y + 6 * subpixel_factor + (j - half_window) * subpixel_factor ; // sums 32bit ints, CHANGED 16 -> 32
-      //printf("Calc. the subpixel coord. at %u %u for pixel %u %u - x %u  y %u \n", i, j,center->x,center->y, x, y);
+      printf("Calc. the subpixel coord. at %u %u for pixel %u %u - x %u  y %u \n", i, j,center->x,center->y, x, y);
       // after 16 -> 32, scanning through window works great
       BoundUpper(x, subpixel_w-6);
       BoundUpper(y, subpixel_h-6);
