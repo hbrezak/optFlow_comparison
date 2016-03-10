@@ -78,8 +78,8 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 	// determine patch sizes and initialize neighborhoods
 	uint16_t patch_size = 2 * half_window_size + 1; //CHANGED to put pixel in center, doesnt seem to impact results much, keep in mind.
 	uint32_t error_threshold = (10 * 10) * (patch_size * patch_size);
-	//uint16_t padded_patch_size = patch_size + 2;
-	uint8_t border_size = patch_size / 2;
+	uint16_t padded_patch_size = patch_size + 2;
+	uint8_t border_size = padded_patch_size / 2;
 	step_threshold = step_threshold*(subpixel_factor/100);
 	// 3 values related to tracking window size, wont overflow
 
@@ -92,7 +92,7 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 
 	// Create the window images
 	struct image_t window_I, window_J, window_DX, window_DY, window_diff, image_DX, image_DY;
-	image_create(&window_I, patch_size, patch_size, IMAGE_GRAYSCALE);
+	image_create(&window_I, padded_patch_size, padded_patch_size, IMAGE_GRAYSCALE);
 	image_create(&window_J, patch_size, patch_size, IMAGE_GRAYSCALE);
 	image_create(&window_DX, patch_size, patch_size, IMAGE_GRADIENT);
 	image_create(&window_DY, patch_size, patch_size, IMAGE_GRADIENT);
@@ -159,45 +159,45 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 			uint32_t iw01 = alpha_x * (subpixel_factor - alpha_y);
 			uint32_t iw10 = (subpixel_factor - alpha_x) * alpha_y;
 			uint32_t iw11 = alpha_x * alpha_y;
-			int32_t G1 = 0,G2 = 0, G3 = 0;
+			//int32_t G1 = 0,G2 = 0, G3 = 0;
 			//printf("factors: %u %u %u %u \n", iw00, iw01, iw10, iw11);
 
 			uint16_t rowStep = pyramid_old[LVL].w;
 
 
 			uint8_t x, y;
-			for (y = 0; y < patch_size; y++)
+			for (y = 0; y < padded_patch_size; y++)
 			{
 				// Set pointers in large images at first element of subwindow row y
-				uint8_t *src_buf = (uint8_t *)pyramid_old[LVL].buf + rowStep * (border_size + round_pos_y - half_window_size + y) + round_pos_x + border_size - half_window_size;
-				int16_t *dxsrc_buf = (int16_t *)image_DX.buf + rowStep * (border_size + round_pos_y - half_window_size + y) + round_pos_x + border_size - half_window_size;
-				int16_t *dysrc_buf = (int16_t *)image_DY.buf + rowStep * (border_size + round_pos_y - half_window_size + y) + round_pos_x + border_size - half_window_size;
+				uint8_t *src_buf = (uint8_t *)pyramid_old[LVL].buf + rowStep * (border_size + round_pos_y - border_size + y) + round_pos_x + border_size - border_size;
+				//int16_t *dxsrc_buf = (int16_t *)image_DX.buf + rowStep * (border_size + round_pos_y - half_window_size + y) + round_pos_x + border_size - half_window_size;
+				//int16_t *dysrc_buf = (int16_t *)image_DY.buf + rowStep * (border_size + round_pos_y - half_window_size + y) + round_pos_x + border_size - half_window_size;
 
 				uint8_t *I_buf = (uint8_t *)window_I.buf;
-				int16_t *dx_buf = (int16_t *)window_DX.buf;
-				int16_t *dy_buf = (int16_t *)window_DY.buf;
+				//int16_t *dx_buf = (int16_t *)window_DX.buf;
+				//int16_t *dy_buf = (int16_t *)window_DY.buf;
 
 				x = 0;
 
-				for ( ; x < patch_size; x++)
+				for ( ; x < padded_patch_size; x++)
 				{
 					I_buf[window_I.w * y + x] = ((uint64_t)(src_buf[x]) * iw00 + (src_buf[x+1])*iw01 + (src_buf[x+rowStep])*iw10 + (src_buf[x+rowStep+1])*iw11) / ((uint64_t)subpixel_factor * subpixel_factor);
 
-					dx_buf[window_DX.w * y + x] = ((int64_t)dxsrc_buf[x] * iw00 + dxsrc_buf[x+1]*iw01 + dxsrc_buf[x+rowStep]*iw10 + dxsrc_buf[x+rowStep+1]*iw11) / ((int64_t)subpixel_factor * subpixel_factor);
+					//dx_buf[window_DX.w * y + x] = ((int64_t)dxsrc_buf[x] * iw00 + dxsrc_buf[x+1]*iw01 + dxsrc_buf[x+rowStep]*iw10 + dxsrc_buf[x+rowStep+1]*iw11) / ((int64_t)subpixel_factor * subpixel_factor);
 
-					dy_buf[window_DY.w * y + x] = ((int64_t)dysrc_buf[x] * iw00 + dysrc_buf[x+1]*iw01 + dysrc_buf[x+rowStep]*iw10 + dysrc_buf[x+rowStep+1]*iw11) / ((int64_t)subpixel_factor * subpixel_factor);
-printf("I buf: %u, dx buf: %d, dy buf: %d \n", I_buf[window_I.w * y + x], dx_buf[window_DX.w * y + x], dy_buf[window_DY.w * y + x]);
-					G1 += dx_buf[window_DX.w * y + x] * dx_buf[window_DX.w * y + x];
-					G2 += dx_buf[window_DX.w * y + x] * dy_buf[window_DX.w * y + x];
-					G3 += dy_buf[window_DX.w * y + x] * dy_buf[window_DX.w * y + x];
+					//dy_buf[window_DY.w * y + x] = ((int64_t)dysrc_buf[x] * iw00 + dysrc_buf[x+1]*iw01 + dysrc_buf[x+rowStep]*iw10 + dysrc_buf[x+rowStep+1]*iw11) / ((int64_t)subpixel_factor * subpixel_factor);
+//printf("I buf: %u, dx buf: %d, dy buf: %d \n", I_buf[window_I.w * y + x], dx_buf[window_DX.w * y + x], dy_buf[window_DY.w * y + x]);
+					//G1 += dx_buf[window_DX.w * y + x] * dx_buf[window_DX.w * y + x];
+					//G2 += dx_buf[window_DX.w * y + x] * dy_buf[window_DX.w * y + x];
+					//G3 += dy_buf[window_DX.w * y + x] * dy_buf[window_DX.w * y + x];
 				}
 			}
 
-			G1 = G1 / 255;
-			G2 = G2 / 255;
-			G3 = G3 / 255;
+			//G1 = G1 / 255;
+			//G2 = G2 / 255;
+			//G3 = G3 / 255;
 
-			int32_t Det = ( G1 * G3 - G2 * G2);
+			//int32_t Det = ( G1 * G3 - G2 * G2);
 
 
 
@@ -218,7 +218,7 @@ printf("I buf: %u, dx buf: %d, dy buf: %d \n", I_buf[window_I.w * y + x], dx_buf
 
 			/*// (1) determine the subpixel neighborhood in the old image
 			image_subpixel_window(&pyramid_old[LVL], &window_I, &vectors[new_p].pos, subpixel_factor, border_size);
-
+*/
 			// (2) get the x- and y- gradients
 			image_gradients(&window_I, &window_DX, &window_DY);
 
@@ -236,7 +236,7 @@ printf("I buf: %u, dx buf: %d, dy buf: %d \n", I_buf[window_I.w * y + x], dx_buf
 			if (Det < 1) {
 				//printf("bad determinant: %d \n", Det);
 				continue;
-			}*/
+			}
 
 			// (4) iterate over taking steps in the image to minimize the error:
 			bool_t tracked = TRUE;
@@ -278,8 +278,8 @@ printf("I buf: %u, dx buf: %d, dy buf: %d \n", I_buf[window_I.w * y + x], dx_buf
 
 
 				//     [d] calculate the additional flow step and possibly terminate the iteration
-				int32_t step_x = (( (int64_t) G3 * b_x - G2 * b_y) * subpixel_factor) / Det; //CHANGED 16 -> 32; changes made so DET is in subpixel now (less point rejection)
-				int32_t step_y = (( (int64_t) G1 * b_y - G2 * b_x) * subpixel_factor) / Det; //CHANGED 16 -> 32; possibly change subpx factor and then this datatype to 32
+				int32_t step_x = (( (int64_t) G[3] * b_x - G[2] * b_y) * subpixel_factor) / Det; //CHANGED 16 -> 32; changes made so DET is in subpixel now (less point rejection)
+				int32_t step_y = (( (int64_t) G[0] * b_y - G[2] * b_x) * subpixel_factor) / Det; //CHANGED 16 -> 32; possibly change subpx factor and then this datatype to 32
 				// Converting step into subpixel directly instead via Det ensures less good points rejection; memory impact?
 				//printf("step x %d step y %d \n", step_x, step_y);
 				//printf("is it large? %ld \n", (((int64_t)G[3] * b_x - G[1] * b_y)*subpixel_factor));

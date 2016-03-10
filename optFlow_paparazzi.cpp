@@ -67,7 +67,7 @@ void optFlow_paparazzi(const char* curImagePath, const char* nextImagePath, cons
 	uint32_t subpixel_factor = 1000; //changed 16 -> 32 here, lucas_kanade.c, lucas_kanade.h; also all functions that use subpixel_factor: image subpixel window,
 	uint8_t max_iterations = 20;
 	uint8_t step_threshold = 3;
-	uint8_t pyramid_level = 0; // 0 for no pyramids
+	uint8_t pyramid_level = 2; // 0 for no pyramids
 	uint16_t max_track_corners = sizeof(corners)/sizeof(*corners);
 	vector<flow_t_> lk_flow;
 	flow_t_ var;
@@ -78,7 +78,7 @@ void optFlow_paparazzi(const char* curImagePath, const char* nextImagePath, cons
 		 * 	uint8_t max_iterations = 40;
 		 * 	uint8_t step_threshold = 0.03;
 	*/
-
+printf("mark0)");
 
 	double time = (double)getTickCount();
 	struct flow_t *vectors = opticFlowLK(&nextGray, &curGray, corners, &numTracked,

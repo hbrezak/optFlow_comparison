@@ -510,7 +510,7 @@ uint32_t image_difference(struct image_t *img_a, struct image_t *img_b, struct i
   // Go trough the imagge pixels and calculate the difference
   for (uint16_t x = 0; x < img_b->w; x++) {
     for (uint16_t y = 0; y < img_b->h; y++) {
-      int16_t diff_c = img_a_buf[(y) * img_a->w + (x)] - img_b_buf[y * img_b->w + x]; //oduzima 2 vrijednosti <-510 - 510 >
+      int16_t diff_c = img_a_buf[(y + 1) * img_a->w + (x + 1)] - img_b_buf[y * img_b->w + x]; //oduzima 2 vrijednosti <-510 - 510 >
       sum_diff2 += diff_c * diff_c; // za s_f 1000 max vrijednost 500*500*15*15 < 100 mil
 
       // Set the difference image
