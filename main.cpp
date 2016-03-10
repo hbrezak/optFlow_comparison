@@ -97,7 +97,7 @@ int main()
 		namedWindow("OpenCV optical flow", WINDOW_AUTOSIZE);
 		imshow("Paparazzi optical flow", dataPaparazzi.flow_viz);
 		imshow("OpenCV optical flow", dataOpencv.flow_viz);
-		//waitKey();
+		waitKey();
 
 
 		/*save_path << output_dir << "/paparazzi/flow_" << frame -1 << type;
