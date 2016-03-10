@@ -241,104 +241,105 @@ void image_yuv422_downsample(struct image_t *input, struct image_t *output, uint
  * This function adds padding to input image by mirroring the edge image elements.
  * @param[in]  *input  - input image (grayscale only)
  * @param[out] *output - the output image
- * @param[in]  expand  - amount of padding needed (expand input image for this amount in all directions)
+ * @param[in]  border_size  - amount of padding around image. Padding is made by reflecting image elements at the edge
+ * 						      Example: f e d c b a | a b c d e f | f e d c b a
  */
-void image_add_padding(struct image_t *input, struct image_t *output, uint8_t expand)
+void image_add_border(struct image_t *input, struct image_t *output, uint8_t border_size)
 {
-	image_create(output, input->w + 2 * expand, input->h + 2 * expand, input->type);
+	image_create(output, input->w + 2 * border_size, input->h + 2 * border_size, input->type);
 
 	uint8_t *input_buf = (uint8_t *)input->buf;
 	uint8_t *output_buf = (uint8_t *)output->buf;
 
-	// Skip first `expand` rows, iterate through next input->h rows
-	for (uint16_t i = expand; i != (output->h - expand); i++){
+	// Skip first `border_size` rows, iterate through next input->h rows
+	for (uint16_t i = border_size; i != (output->h - border_size); i++){
 
-		// Mirror first `expand` columns
-		for (uint8_t j = 0; j != expand; j++)
-			output_buf[i * output->w + (expand - 1 - j)] = input_buf[(i - expand) * input->w + j];
+		// Mirror first `border_size` columns
+		for (uint8_t j = 0; j != border_size; j++)
+			output_buf[i * output->w + (border_size - 1 - j)] = input_buf[(i - border_size) * input->w + j];
 
 		// Copy corresponding row values from input image
-		memcpy(&output_buf[i * output->w + expand], &input_buf[(i - expand) * input->w], sizeof(uint8_t) * input->w);
+		memcpy(&output_buf[i * output->w + border_size], &input_buf[(i - border_size) * input->w], sizeof(uint8_t) * input->w);
 
-		// Mirror last `expand` columns
-		for (uint8_t j = 0; j != expand; j++)
-			output_buf[i * output->w + output->w - expand + j] = output_buf[i * output->w + output->w - expand -1 - j];
+		// Mirror last `border_size` columns
+		for (uint8_t j = 0; j != border_size; j++)
+			output_buf[i * output->w + output->w - border_size + j] = output_buf[i * output->w + output->w - border_size -1 - j];
 	}
 
-	// Mirror first `expand` and last `expand` rows
-	for (uint8_t i = 0; i != expand; i++){
-		memcpy(&output_buf[(expand - 1) * output->w - i * output->w], &output_buf[expand * output->w + i * output->w], sizeof(uint8_t) * output->w);
-		memcpy(&output_buf[(output->h - expand) * output->w + i * output->w], &output_buf[(output->h - expand - 1) * output->w - i * output->w], sizeof(uint8_t) * output->w);
+	// Mirror first `border_size` and last `border_size` rows
+	for (uint8_t i = 0; i != border_size; i++){
+		memcpy(&output_buf[(border_size - 1) * output->w - i * output->w], &output_buf[border_size * output->w + i * output->w], sizeof(uint8_t) * output->w);
+		memcpy(&output_buf[(output->h - border_size) * output->w + i * output->w], &output_buf[(output->h - border_size - 1) * output->w - i * output->w], sizeof(uint8_t) * output->w);
 	}
 }
 
 /**
- * This function calculates and outputs next level of pyramid based on input.
- * For calculating new pixel value 5x5 filter matrix suggested by Bouguet is used.
+ * This function takes previous padded pyramid level and outputs next level of pyramid without padding.
+ * For calculating new pixel value 5x5 filter matrix suggested by Bouguet is used in decimal number form:
+ * [1/16 1/8 3/4 1/8 1/16]' x [1/16 1/8 3/4 1/8 1/16]
+ *
  * @param[in]  *input  - input image (grayscale only)
  * @param[out] *output - the output image
+ * @param[in]  border_size  - amount of padding around image. Padding is made by reflecting image elements at the edge
+ * 						      Example: f e d c b a | a b c d e f | f e d c b a
  */
-void pyramid_next_level(struct image_t *input, struct image_t *output)
+void pyramid_next_level(struct image_t *input, struct image_t *output, uint8_t border_size)
 {
-	struct image_t padded;
-	image_add_padding(input, &padded, 2);
-	image_create(output, (input->w+1)/2, (input->h+1)/2, input->type);
+	// Create output image, new image size is half the size of input image without padding (border)
+	image_create(output, (input->w + 1 - 2 * border_size) / 2, (input->h + 1 - 2 * border_size ) / 2, input->type);
 
-	uint8_t *padded_buf = (uint8_t *)padded.buf;
+	uint8_t *input_buf = (uint8_t *)input->buf;
 	uint8_t *output_buf = (uint8_t *)output->buf;
 
 	uint16_t row, col; // coordinates of the central pixel; pixel being calculated in input matrix; center of filer matrix
-	uint16_t w = padded.w;
+	uint16_t w = input->w;
 	float sum = 0;
 
 	for (uint16_t i = 0; i != output->h; i++){
 
 		for (uint16_t j = 0; j != output->w; j++){
-			row = 2 + 2 * i;
-			col = 2 + 2 * j;
-			/*output_buf[i*output->w + j] = round(0.0039*input_buf[(2+2*i -2)*input->w + (2+2*j -2)] + 1.0/64*input_buf[(2+2*i -2)*input->w + (2+2*j -1)] +
-					3.0/128*input_buf[(2+2*i -2)*input->w + (2+2*j)] + 1.0/64*input_buf[(2+2*i -2)*input->w + (2+2*j +1)] + 0.0039*input_buf[(2+2*i -2)*input->w + (2+2*j +2)] +
-					1.0/64*input_buf[(2+2*i -1)*input->w + (2+2*j -2)] + 1.0/16*input_buf[(2+2*i -1)*input->w + (2+2*j -1)] + 3.0/32*input_buf[(2+2*i -1)*input->w + (2+2*j)] +
-					1.0/16*input_buf[(2+2*i -1)*input->w + (2+2*j +1)] + 1.0/64*input_buf[(2+2*i -1)*input->w + (2+2*j +2)] + 3.0/128*input_buf[(2+2*i)*input->w + (2+2*j -2)] +
-					3.0/32*input_buf[(2+2*i)*input->w + (2+2*j -1)] + 9.0/64*input_buf[(2+2*i)*input->w + (2+2*j)] + 3.0/32*input_buf[(2+2*i)*input->w + (2+2*j +1)] +
-					3.0/128*input_buf[(2+2*i)*input->w + (2+2*j +2)] + 1.0/64*input_buf[(2+2*i +1)*input->w + (2+2*j -2)] + 1.0/16*input_buf[(2+2*i +1)*input->w + (2+2*j -1)] +
-					3.0/32*input_buf[(2+2*i +1)*input->w + (2+2*j)] +1.0/16*input_buf[(2+2*i +1)*input->w + (2+2*j +1)] + 1.0/64*input_buf[(2+2*i +1)*input->w + (2+2*j +2)] +
-					0.0039*input_buf[(2+2*i +2)*input->w + (2+2*j -2)] + 1.0/64*input_buf[(2+2*i +2)*input->w + (2+2*j -1)] + 3.0/128*input_buf[(2+2*i +2)*input->w + (2+2*j)] +
-					1.0/64*input_buf[(2+2*i +2)*input->w + (2+2*j +1)] + 0.0039*input_buf[(2+2*i +2)*input->w + (2+2*j +2)]);*/
+			row = border_size + 2 * i; // First skip border, then every second pixel
+			col = border_size + 2 * j;
 
-			sum =  0.0039*padded_buf[(row -2)*w + (col -2)] + 0.0156*padded_buf[(row -2)*w + (col -1)] + 0.0234*padded_buf[(row -2)*w + (col)];
-			sum += 0.0156*padded_buf[(row -2)*w + (col +1)] + 0.0039*padded_buf[(row -2)*w + (col +2)] + 0.0156*padded_buf[(row -1)*w + (col -2)];
-			sum += 0.0625*padded_buf[(row -1)*w + (col -1)] + 0.0938*padded_buf[(row -1)*w + (col)]    + 0.0625*padded_buf[(row -1)*w + (col +1)];
-			sum += 0.0156*padded_buf[(row -1)*w + (col +2)] + 0.0234*padded_buf[(row)*w    + (col -2)] + 0.0938*padded_buf[(row)*w    + (col -1)];
-			sum += 0.1406*padded_buf[(row)*w    + (col)]    + 0.0938*padded_buf[(row)*w    + (col +1)] + 0.0234*padded_buf[(row)*w    + (col +2)];
-			sum += 0.0156*padded_buf[(row +1)*w + (col -2)] + 0.0625*padded_buf[(row +1)*w + (col -1)] + 0.0938*padded_buf[(row +1)*w + (col)];
-			sum += 0.0625*padded_buf[(row +1)*w + (col +1)] + 0.0156*padded_buf[(row +1)*w + (col +2)] + 0.0039*padded_buf[(row +2)*w + (col -2)];
-			sum += 0.0156*padded_buf[(row +2)*w + (col -1)] + 0.0234*padded_buf[(row +2)*w + (col)]    + 0.0156*padded_buf[(row +2)*w + (col +1)];
-			sum += 0.0039*padded_buf[(row +2)*w + (col +2)];
+			sum =  0.0039*input_buf[(row -2)*w + (col -2)] + 0.0156*input_buf[(row -2)*w + (col -1)] + 0.0234*input_buf[(row -2)*w + (col)];
+			sum += 0.0156*input_buf[(row -2)*w + (col +1)] + 0.0039*input_buf[(row -2)*w + (col +2)] + 0.0156*input_buf[(row -1)*w + (col -2)];
+			sum += 0.0625*input_buf[(row -1)*w + (col -1)] + 0.0938*input_buf[(row -1)*w + (col)]    + 0.0625*input_buf[(row -1)*w + (col +1)];
+			sum += 0.0156*input_buf[(row -1)*w + (col +2)] + 0.0234*input_buf[(row)*w    + (col -2)] + 0.0938*input_buf[(row)*w    + (col -1)];
+			sum += 0.1406*input_buf[(row)*w    + (col)]    + 0.0938*input_buf[(row)*w    + (col +1)] + 0.0234*input_buf[(row)*w    + (col +2)];
+			sum += 0.0156*input_buf[(row +1)*w + (col -2)] + 0.0625*input_buf[(row +1)*w + (col -1)] + 0.0938*input_buf[(row +1)*w + (col)];
+			sum += 0.0625*input_buf[(row +1)*w + (col +1)] + 0.0156*input_buf[(row +1)*w + (col +2)] + 0.0039*input_buf[(row +2)*w + (col -2)];
+			sum += 0.0156*input_buf[(row +2)*w + (col -1)] + 0.0234*input_buf[(row +2)*w + (col)]    + 0.0156*input_buf[(row +2)*w + (col +1)];
+			sum += 0.0039*input_buf[(row +2)*w + (col +2)];
 
 			output_buf[i*output->w + j] = round(sum);
 		}
 	}
-
-	image_free(&padded);
 }
 
 
 /**
- * This function populates given array of image_t structs with wanted number of pyramids based on given input.
+ * This function populates given array of image_t structs with wanted number of padded pyramids based on given input.
  * @param[in]  *input  - input image (grayscale only)
  * @param[out] *output - array of image_t structs containing image pyiramid levels. Level zero contains original image,
  *                       followed by `pyr_level` of pyramid.
+ * @param[in]  pyr_level  - number of pyramids to be built. If 0, original image is padded and outputed.
+ * @param[in]  border_size  - amount of padding around image. Padding is made by reflecting image elements at the edge
+ * 						      Example: f e d c b a | a b c d e f | f e d c b a
  */
-void pyramid_build(struct image_t *input, struct image_t *output_array, uint8_t pyr_level)
+void pyramid_build(struct image_t *input, struct image_t *output_array, uint8_t pyr_level, uint8_t border_size)
 {
-	image_create(&output_array[0], input->w, input->h, input->type);
-	image_copy(input, &output_array[0]);
+	// Pad input image and save it as '0' pyramid level
+	image_add_border(input, &output_array[0], border_size);
 
-	for (uint8_t i = 1; i != pyr_level + 1; i++)
-		pyramid_next_level(&output_array[i-1], &output_array[i]);
+	// Temporary holds 'i' level version of original image to be padded and saved as 'i' pyramid level
+	struct image_t temp;
+
+	for (uint8_t i = 1; i != pyr_level + 1; i++){
+		pyramid_next_level(&output_array[i-1], &temp, border_size);
+		image_add_border(&temp, &output_array[i], border_size);
+		image_free(&temp);
+	}
 }
-
 
 /**
  * This outputs a subpixel window image in grayscale
@@ -348,8 +349,10 @@ void pyramid_build(struct image_t *input, struct image_t *output_array, uint8_t 
  * @param[out] *output Window output (width and height is used to calculate the window size)
  * @param[in] *center Center point in subpixel coordinates
  * @param[in] subpixel_factor The subpixel factor per pixel
+ * @param[in]  border_size  - amount of padding around image. Padding is made by reflecting image elements at the edge
+ * 						      Example: f e d c b a | a b c d e f | f e d c b a
  */
-void image_subpixel_window(struct image_t *input, struct image_t *output, struct point_t *center, uint32_t subpixel_factor)
+void image_subpixel_window(struct image_t *input, struct image_t *output, struct point_t *center, uint32_t subpixel_factor, uint8_t border_size)
 {
 	// first call: image_subpixel_window(old_img, &window_I, &vectors[new_p].pos, subpixel_factor);
   uint8_t *input_buf = (uint8_t *)input->buf; //contains original gray image values in range 0-255
@@ -370,12 +373,12 @@ void image_subpixel_window(struct image_t *input, struct image_t *output, struct
   for (uint16_t i = 0; i < output->w; i++) {
     for (uint16_t j = 0; j < output->h; j++) {
       // Calculate the subpixel coordinate
-      uint32_t x = center->x + (i - half_window) * subpixel_factor;
-      uint32_t y = center->y + (j - half_window) * subpixel_factor; // sums 32bit ints, CHANGED 16 -> 32
+      uint32_t x = center->x + border_size * subpixel_factor + (i - half_window) * subpixel_factor ;
+      uint32_t y = center->y + border_size * subpixel_factor + (j - half_window) * subpixel_factor ; // sums 32bit ints, CHANGED 16 -> 32
       //printf("Calc. the subpixel coord. at %u %u for pixel %u %u - x %u  y %u \n", i, j,center->x,center->y, x, y);
       // after 16 -> 32, scanning through window works great
-      BoundUpper(x, subpixel_w);
-      BoundUpper(y, subpixel_h);
+      BoundUpper(x, subpixel_w - border_size);
+      BoundUpper(y, subpixel_h - border_size);
 
       // Calculate the original pixel coordinate
       uint16_t orig_x = x / subpixel_factor;

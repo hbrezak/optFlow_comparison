@@ -75,19 +75,20 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 	// Allocate some memory for returning the vectors
 	struct flow_t *vectors = malloc(sizeof(struct flow_t) * max_points);
 
+	// determine patch sizes and initialize neighborhoods
+	uint16_t patch_size = 2 * half_window_size + 1; //CHANGED to put pixel in center, doesnt seem to impact results much, keep in mind.
+	uint32_t error_threshold = (10 * 10) * (patch_size * patch_size);
+	uint16_t padded_patch_size = patch_size + 2;
+	uint8_t border_size = padded_patch_size / 2;
+	step_threshold = step_threshold*(subpixel_factor/100);
+	// 3 values related to tracking window size, wont overflow
+
 	// Allocate memory for image pyramids
 	struct image_t *pyramid_old = (struct image_t *)malloc(sizeof(struct image_t) * (pyramid_level+1));
 	struct image_t *pyramid_new = (struct image_t *)malloc(sizeof(struct image_t) * (pyramid_level+1));
 
-	pyramid_build(old_img, pyramid_old, pyramid_level);
-	pyramid_build(new_img, pyramid_new, pyramid_level);
-
-	// determine patch sizes and initialize neighborhoods
-	uint16_t patch_size = 2 * half_window_size + 1; //CHANGED to put pixel in center, doesnt seem to impact results much, keep in mind.
-	uint32_t error_threshold = (25 * 25) * (patch_size * patch_size);
-	uint16_t padded_patch_size = patch_size + 2;
-	step_threshold = step_threshold*(subpixel_factor/100);
-	// 3 values related to tracking window size, wont overflow
+	pyramid_build(old_img, pyramid_old, pyramid_level, border_size);
+	pyramid_build(new_img, pyramid_new, pyramid_level, border_size);
 
 	// Create the window images
 	struct image_t window_I, window_J, window_DX, window_DY, window_diff;
@@ -127,16 +128,6 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 
 				//printf("%u x %u, pos y %u, flowx %d, flowy %d \n", i, vectors[new_p].pos.x, vectors[new_p].pos.y,vectors[new_p].flow_x, vectors[new_p].flow_y );
 
-
-				// If the pixel is outside ROI, do not track it
-				if (vectors[new_p].pos.x/subpixel_factor < half_window_size || (pyramid_old[LVL].w - vectors[new_p].pos.x/subpixel_factor) < half_window_size
-						|| vectors[new_p].pos.y/subpixel_factor < half_window_size || (pyramid_old[LVL].h - vectors[new_p].pos.y/subpixel_factor) < half_window_size) {
-					printf("Input feature outside ROI %u, %u ; image size: %u %u\n", vectors[new_p].pos.x/subpixel_factor, vectors[new_p].pos.y/subpixel_factor,
-							pyramid_old[LVL].w, pyramid_old[LVL].h); //ADDED
-					//CONC: consistent in not tracking edge features
-					continue;
-				}
-
 			} else {
 				// Convert last pyramid level flow into this pyramid level flow guess
 				//printf("2nd pyr lvl: pos x %u, flow x %d \n", vectors[new_p].pos.x, vectors[new_p].flow_x);
@@ -149,17 +140,10 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 				//printf("%u x %u, pos y %u, flowx %d, flowy %d \n", i, vectors[new_p].pos.x, vectors[new_p].pos.y,vectors[new_p].flow_x, vectors[new_p].flow_y );
 				//sleep(1);
 
-				// If the pixel is outside ROI, do not track it
-				if (vectors[new_p].pos.x/subpixel_factor < half_window_size || (pyramid_old[LVL].w - vectors[new_p].pos.x/subpixel_factor) < half_window_size
-						|| vectors[new_p].pos.y/subpixel_factor < half_window_size || (pyramid_old[LVL].h - vectors[new_p].pos.y/subpixel_factor) < half_window_size) {
-					printf("V2 Input feature outside ROI %u, %u \n",vectors[new_p].pos.x/subpixel_factor, vectors[new_p].pos.y); //ADDED
-					//CONC: consistent in not tracking edge features
-					continue;
-				}
 			}
 
 			// (1) determine the subpixel neighborhood in the old image
-			image_subpixel_window(&pyramid_old[LVL], &window_I, &vectors[new_p].pos, subpixel_factor);
+			image_subpixel_window(&pyramid_old[LVL], &window_I, &vectors[new_p].pos, subpixel_factor, border_size);
 
 			// (2) get the x- and y- gradients
 			image_gradients(&window_I, &window_DX, &window_DY);
@@ -171,12 +155,12 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 			// calculate G's determinant in subpixel units:
 			int32_t Det = ( G[0] * G[3] - G[1] * G[2]);//	/ subpixel_factor; // 1000 * 1000
 			//printf("Max umnozak za det: %d \n", G[0]*G[3]); // milijuni za subpix = 10 000 i wind 10; za wind 31 deset mil
-			//printf("Determinanta: %d \n", Det);
-			//printf("Determinanta prava: %f \n",((float)G[0] * G[3] - G[1] * G[2])/ subpixel_factor);
+			//printf("DEterminanta: %d for point %d %d \n ", Det,vectors[new_p].pos.y/subpixel_factor,vectors[new_p].pos.x/subpixel_factor );
+
 
 			// Check if the determinant is bigger than 1
 			if (Det < 1) {
-				printf("bad det");
+				//printf("bad determinant: %d \n", Det);
 				continue;
 			}
 
@@ -186,26 +170,32 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 			for (uint8_t it = max_iterations; it--; ) {
 				struct point_t new_point = { vectors[new_p].pos.x  + vectors[new_p].flow_x,
 											 vectors[new_p].pos.y + vectors[new_p].flow_y };
+
+
 				// If the pixel is outside ROI, do not track it
-				if (new_point.x / subpixel_factor < half_window_size || (pyramid_new[LVL].w - new_point.x / subpixel_factor) < half_window_size
-						|| new_point.y / subpixel_factor < half_window_size || (pyramid_new[LVL].h - new_point.y / subpixel_factor)< half_window_size)
+				if ( (((int32_t)vectors[new_p].pos.x  + vectors[new_p].flow_x) < 0)
+						|| ((new_point.x / subpixel_factor) > (pyramid_new[LVL].w - 2*border_size))
+						|| (((int32_t)vectors[new_p].pos.y  + vectors[new_p].flow_y) < 0)
+						|| ((new_point.y / subpixel_factor) > (pyramid_new[LVL].h - 2*border_size)) )
 				{
 					tracked = FALSE;
-					printf("*New point outside ROI %u, %u; window size w %u h %u \n",
-							new_point.x /subpixel_factor, new_point.y/subpixel_factor, pyramid_new[LVL].w, pyramid_new[LVL].h); //ADDED
+					//printf("*New point outside ROI %d, %d; window size w %u h %u \n",
+					//		((int32_t)vectors[new_p].pos.x  + vectors[new_p].flow_x),
+					//		((int32_t)vectors[new_p].pos.y  + vectors[new_p].flow_y),
+					//		pyramid_new[LVL].w,	pyramid_new[LVL].h); //ADDED
 					break;
 				}
 
 
 				//     [a] get the subpixel neighborhood in the new image
-				image_subpixel_window(&pyramid_new[LVL], &window_J, &new_point, subpixel_factor);
+				image_subpixel_window(&pyramid_new[LVL], &window_J, &new_point, subpixel_factor, border_size);
 
 				//     [b] determine the image difference between the two neighborhoods
 				uint32_t error = image_difference(&window_I, &window_J, &window_diff);
 
 				if (error > error_threshold && it < max_iterations / 2) {
 					tracked = FALSE;
-					printf("*Error larger than error treshold for %d %d \n", vectors[new_p].pos.x/subpixel_factor, vectors[new_p].pos.y/subpixel_factor); //ADDED
+				//printf("*Error larger than error treshold for %d %d \n", vectors[new_p].pos.x/subpixel_factor, vectors[new_p].pos.y/subpixel_factor); //ADDED
 					break;
 				}
 
