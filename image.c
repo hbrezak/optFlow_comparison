@@ -241,7 +241,8 @@ void image_yuv422_downsample(struct image_t *input, struct image_t *output, uint
  * This function adds padding to input image by mirroring the edge image elements.
  * @param[in]  *input  - input image (grayscale only)
  * @param[out] *output - the output image
- * @param[in]  expand  - amount of padding needed (expand input image for this amount in all directions)
+ * @param[in]  border_size  - amount of padding around image. Padding is made by reflecting image elements at the edge
+ * 						      Example: f e d c b a | a b c d e f | f e d c b a
  */
 void image_add_border(struct image_t *input, struct image_t *output, uint8_t border_size)
 {
@@ -273,13 +274,18 @@ void image_add_border(struct image_t *input, struct image_t *output, uint8_t bor
 }
 
 /**
- * This function calculates and outputs next level of pyramid based on input.
- * For calculating new pixel value 5x5 filter matrix suggested by Bouguet is used.
+ * This function takes previous padded pyramid level and outputs next level of pyramid without padding.
+ * For calculating new pixel value 5x5 filter matrix suggested by Bouguet is used in decimal number form:
+ * [1/16 1/8 3/4 1/8 1/16]' x [1/16 1/8 3/4 1/8 1/16]
+ *
  * @param[in]  *input  - input image (grayscale only)
  * @param[out] *output - the output image
+ * @param[in]  border_size  - amount of padding around image. Padding is made by reflecting image elements at the edge
+ * 						      Example: f e d c b a | a b c d e f | f e d c b a
  */
 void pyramid_next_level(struct image_t *input, struct image_t *output, uint8_t border_size)
 {
+	// Create output image, new image size is half the size of input image without padding (border)
 	image_create(output, (input->w + 1 - 2 * border_size) / 2, (input->h + 1 - 2 * border_size ) / 2, input->type);
 
 	uint8_t *input_buf = (uint8_t *)input->buf;
@@ -292,7 +298,7 @@ void pyramid_next_level(struct image_t *input, struct image_t *output, uint8_t b
 	for (uint16_t i = 0; i != output->h; i++){
 
 		for (uint16_t j = 0; j != output->w; j++){
-			row = border_size + 2 * i;
+			row = border_size + 2 * i; // First skip border, then every second pixel
 			col = border_size + 2 * j;
 
 			sum =  0.0039*input_buf[(row -2)*w + (col -2)] + 0.0156*input_buf[(row -2)*w + (col -1)] + 0.0234*input_buf[(row -2)*w + (col)];
@@ -312,14 +318,20 @@ void pyramid_next_level(struct image_t *input, struct image_t *output, uint8_t b
 
 
 /**
- * This function populates given array of image_t structs with wanted number of pyramids based on given input.
+ * This function populates given array of image_t structs with wanted number of padded pyramids based on given input.
  * @param[in]  *input  - input image (grayscale only)
  * @param[out] *output - array of image_t structs containing image pyiramid levels. Level zero contains original image,
  *                       followed by `pyr_level` of pyramid.
+ * @param[in]  pyr_level  - number of pyramids to be built. If 0, original image is padded and outputed.
+ * @param[in]  border_size  - amount of padding around image. Padding is made by reflecting image elements at the edge
+ * 						      Example: f e d c b a | a b c d e f | f e d c b a
  */
 void pyramid_build(struct image_t *input, struct image_t *output_array, uint8_t pyr_level, uint8_t border_size)
 {
+	// Pad input image and save it as '0' pyramid level
 	image_add_border(input, &output_array[0], border_size);
+
+	// Temporary holds 'i' level version of original image to be padded and saved as 'i' pyramid level
 	struct image_t temp;
 
 	for (uint8_t i = 1; i != pyr_level + 1; i++){
@@ -327,9 +339,7 @@ void pyramid_build(struct image_t *input, struct image_t *output_array, uint8_t 
 		image_add_border(&temp, &output_array[i], border_size);
 		image_free(&temp);
 	}
-
 }
-
 
 /**
  * This outputs a subpixel window image in grayscale
@@ -339,6 +349,8 @@ void pyramid_build(struct image_t *input, struct image_t *output_array, uint8_t 
  * @param[out] *output Window output (width and height is used to calculate the window size)
  * @param[in] *center Center point in subpixel coordinates
  * @param[in] subpixel_factor The subpixel factor per pixel
+ * @param[in]  border_size  - amount of padding around image. Padding is made by reflecting image elements at the edge
+ * 						      Example: f e d c b a | a b c d e f | f e d c b a
  */
 void image_subpixel_window(struct image_t *input, struct image_t *output, struct point_t *center, uint32_t subpixel_factor, uint8_t border_size)
 {

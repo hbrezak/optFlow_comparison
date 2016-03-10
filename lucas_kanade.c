@@ -178,7 +178,7 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 
 			// Check if the determinant is bigger than 1
 			if (Det < 1) {
-				printf("bad determinant: %d \n", Det);
+				//printf("bad determinant: %d \n", Det);
 				continue;
 			}
 
@@ -197,10 +197,10 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 						|| ((new_point.y / subpixel_factor) > (pyramid_new[LVL].h - 2*border_size)) )
 				{
 					tracked = FALSE;
-					printf("*New point outside ROI %d, %d; window size w %u h %u \n",
-							((int32_t)vectors[new_p].pos.x  + vectors[new_p].flow_x),
-							((int32_t)vectors[new_p].pos.y  + vectors[new_p].flow_y),
-							pyramid_new[LVL].w,	pyramid_new[LVL].h); //ADDED
+					//printf("*New point outside ROI %d, %d; window size w %u h %u \n",
+					//		((int32_t)vectors[new_p].pos.x  + vectors[new_p].flow_x),
+					//		((int32_t)vectors[new_p].pos.y  + vectors[new_p].flow_y),
+					//		pyramid_new[LVL].w,	pyramid_new[LVL].h); //ADDED
 					break;
 				}
 
@@ -213,7 +213,7 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 
 				if (error > error_threshold && it < max_iterations / 2) {
 					tracked = FALSE;
-					printf("*Error larger than error treshold for %d %d \n", vectors[new_p].pos.x/subpixel_factor, vectors[new_p].pos.y/subpixel_factor); //ADDED
+					//printf("*Error larger than error treshold for %d %d \n", vectors[new_p].pos.x/subpixel_factor, vectors[new_p].pos.y/subpixel_factor); //ADDED
 					break;
 				}
 
