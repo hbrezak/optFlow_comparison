@@ -78,8 +78,8 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 	// determine patch sizes and initialize neighborhoods
 	uint16_t patch_size = 2 * half_window_size + 1; //CHANGED to put pixel in center, doesnt seem to impact results much, keep in mind.
 	uint32_t error_threshold = (10 * 10) * (patch_size * patch_size);
-	uint16_t padded_patch_size = patch_size + 2;
-	uint8_t border_size = padded_patch_size / 2;
+	//uint16_t padded_patch_size = patch_size + 2;
+	uint8_t border_size = patch_size / 2;
 	step_threshold = step_threshold*(subpixel_factor/100);
 	// 3 values related to tracking window size, wont overflow
 
@@ -92,7 +92,7 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 
 	// Create the window images
 	struct image_t window_I, window_J, window_DX, window_DY, window_diff;
-	image_create(&window_I, padded_patch_size, padded_patch_size, IMAGE_GRAYSCALE);
+	image_create(&window_I, patch_size, patch_size, IMAGE_GRAYSCALE);
 	image_create(&window_J, patch_size, patch_size, IMAGE_GRAYSCALE);
 	image_create(&window_DX, patch_size, patch_size, IMAGE_GRADIENT);
 	image_create(&window_DY, patch_size, patch_size, IMAGE_GRADIENT);
@@ -142,7 +142,7 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 
 			}
 
-			// (1) determine the subpixel neighborhood in the old image
+			/*// (1) determine the subpixel neighborhood in the old image
 			image_subpixel_window(&pyramid_old[LVL], &window_I, &vectors[new_p].pos, subpixel_factor, border_size);
 
 			// (2) get the x- and y- gradients
@@ -162,7 +162,7 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 			if (Det < 1) {
 				//printf("bad determinant: %d \n", Det);
 				continue;
-			}
+			}*/
 
 			// (4) iterate over taking steps in the image to minimize the error:
 			bool_t tracked = TRUE;
