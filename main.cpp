@@ -66,8 +66,6 @@ int main()
 
 	optFlow_paparazzi(firstImg, secondImg, ground_truth_file, currPoints, dataPaparazzi);
 
-	optFlow_opencv(firstImg, secondImg, ground_truth_file, currPoints, pyrLevel, dataOpencvPyr);
-
 	cout << "Paparazzi results: " << endl;
 	cout << "Average angular error: " << dataPaparazzi.angErr << endl;
 	cout << "Average magnitude error: " << dataPaparazzi.magErr <<endl;
@@ -80,12 +78,6 @@ int main()
 	cout << "Average magnitude error: " << dataOpencv.magErr << endl;
 	cout << "Time passed in miliseconds: " << dataOpencv.time << endl;
 
-	cout << endl; cout << endl;
-
-	cout << "OpenCV with pyramids results: " << endl;
-	cout << "Average angular error: " << dataOpencvPyr.angErr << endl;
-	cout << "Average magnitude error: " << dataOpencvPyr.magErr << endl;
-	cout << "Time passed in miliseconds: " << dataOpencvPyr.time << endl;
 
 
 
@@ -94,10 +86,10 @@ int main()
 
 	namedWindow("Paparazzi optical flow", WINDOW_AUTOSIZE);
 	namedWindow("OpenCV optical flow", WINDOW_AUTOSIZE);
-	namedWindow("OpenCV with pyramids optical flow", WINDOW_AUTOSIZE);
+
 	imshow("Paparazzi optical flow", dataPaparazzi.flow_viz);
 	imshow("OpenCV optical flow", dataOpencv.flow_viz);
-	imshow("OpenCV with pyramids optical flow", dataOpencvPyr.flow_viz);
+
 	waitKey();
 
 	return 0;
