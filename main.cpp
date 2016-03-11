@@ -68,7 +68,7 @@ int main()
 		 */
 
 		// Initalize containers for optical flow results
-		  dataOpencv, dataPaparazzi, dataOpencvPyr;
+		flowResults dataOpencv, dataPaparazzi, dataOpencvPyr;
 
 		// Calculate flow
 		optFlow_paparazzi(first_image, second_image, ground_truth, points, dataPaparazzi);

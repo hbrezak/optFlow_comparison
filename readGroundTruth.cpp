@@ -73,7 +73,7 @@ void readGroundTruth(const char* filename, const vector<flow_t_>& points, vector
 		full_gt_flow_y.push_back(vert_flow);
 	}
 
-	cout << "File read successfully!" << endl;
+	//cout << "File read successfully!" << endl;
 
 	fclose(stream);
 
