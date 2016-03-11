@@ -24,7 +24,7 @@ extern "C" {
 using namespace cv;
 using namespace std;
 
-void optFlow_paparazzi(char* curImagePath, char* nextImagePath, char* groundTruthPath, const vector<Point2f>& currPoints, flowResults& results)
+void optFlow_paparazzi(const char* curImagePath, const char* nextImagePath, const char* groundTruthPath, const vector<Point2f>& currPoints, flowResults& results)
 {
 	Mat curImg = imread(curImagePath, CV_LOAD_IMAGE_COLOR);
 	Mat nextImg = imread(nextImagePath, CV_LOAD_IMAGE_COLOR);
@@ -85,6 +85,7 @@ void optFlow_paparazzi(char* curImagePath, char* nextImagePath, char* groundTrut
 		var.flow_y = float(vectors[i].flow_y) / subpixel_factor;
 		lk_flow.push_back(var);
 	}
+	results.points_left = numTracked;
 
 	calcErrorMetrics(groundTruthPath, lk_flow, results.angErr, results.magErr);
 

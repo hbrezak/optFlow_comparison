@@ -15,6 +15,7 @@ struct flowResults {
 	float angErr;
 	float magErr;
 	float time;
+	int points_left;
 	cv::Mat flow_viz;
 };
 

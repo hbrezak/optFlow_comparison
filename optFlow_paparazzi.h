@@ -18,7 +18,7 @@
 #include <vector>
 #include "opencv2/core.hpp"
 
-void optFlow_paparazzi(char*, char*, char*, const std::vector<cv::Point2f>&, flowResults&);
+void optFlow_paparazzi(const char*, const char*, const char*, const std::vector<cv::Point2f>&, flowResults&);
 
 
 #endif /* OPTFLOW_PAPARAZZI_H_ */

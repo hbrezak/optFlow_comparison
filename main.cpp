@@ -5,92 +5,112 @@
  *      Author: hrvoje
  */
 
-#include "opencv2/imgproc/imgproc.hpp"
-#include "opencv2/highgui/highgui.hpp"
-#include "opencv2/imgcodecs.hpp" //imread now part of this module (not corrected in opencv documentation)
-#include "opencv2/video/video.hpp"
-
-#include "opencv2/core.hpp"
-
-
 #include <iostream>
-#include <cmath>
-#include <stdio.h>
-#include <stdexcept>
 
-#include "lucas_kanade.h"
-#include "showFlow.h"
+#include "opencv2/highgui/highgui.hpp"
+#include "opencv2/video/video.hpp"
+#include <sstream>
 
-#include "calcErrorMetrics.h"
-#include "time.h"
+#include "read_dir_contents.h"
 #include "optFlow_opencv.h"
 #include "optFlow_paparazzi.h"
 
 using namespace cv;
 using namespace std;
 
-
 int main()
 {
-	//Enter the path for images
+	/*//Enter the path for images
 	char firstImg[] =
-			"/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSet2/images/frame10.png";
+			"/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSet5/frame10.png";
 	char secondImg[] =
-			"/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSet2/images/frame11.png";
+			"/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSet5/frame11.png";
 	char ground_truth_file[] =
-			"/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSet2/ground_truth/ground_truth.flo";
-
-	//Find good features to track
-	//Initalize some constants and parameters
-	const int MAX_FEATURES = 500;
-	int pyrLevel = 2;	 // max value is 3; 0 == pyramids not used(1 lvl), 1 == 2 levels used
-	Mat curFrame = imread(firstImg, IMREAD_GRAYSCALE);
-	vector<Point2f> currPoints; //typedef Point_<float> Point2f;
-	//REMEMBER! currPoints.x == width == columns; currPoints.y == height == rows;
-
-	//Find good features location
-	goodFeaturesToTrack(curFrame, currPoints, MAX_FEATURES, 0.01, 10, Mat(), 3,	0, 0.04);
-
-	//Refine good features location - finds subpixels feature location
-	//cornerSubPix(currFrame, currPoints, subPixWinSize, Size(-1,-1), termcrit);
-/*
-	cout << "Points for both algorithms" << endl;
-	cout << "size : " << currPoints.size() << endl;
-	for (unsigned int i = 0; i != currPoints.size(); i++)
-		cout << currPoints[i].y << "   " << currPoints[i].x << endl;
+			"/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSet5/ground_truth.flo";
 */
+	vector<string> *image_filenames;
+	vector<string> *ground_truth_filenames;
 
-	flowResults dataOpencv, dataPaparazzi, dataOpencvPyr;
+	image_filenames = listdir("/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSequence4/images");
+	ground_truth_filenames = listdir("/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSequence4/ground_truth");
+	string output_dir = "/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSequence4/output";
 
-	optFlow_opencv(firstImg, secondImg, ground_truth_file, currPoints, 0, dataOpencv);
-
-	optFlow_paparazzi(firstImg, secondImg, ground_truth_file, currPoints, dataPaparazzi);
-
-	cout << "Paparazzi results: " << endl;
-	cout << "Average angular error: " << dataPaparazzi.angErr << endl;
-	cout << "Average magnitude error: " << dataPaparazzi.magErr <<endl;
-	cout << "Time passed in miliseconds: " << dataPaparazzi.time << endl;
-
-	cout << endl; cout << endl;
-
-	cout << "OpenCV results: " << endl;
-	cout << "Average angular error: " << dataOpencv.angErr << endl;
-	cout << "Average magnitude error: " << dataOpencv.magErr << endl;
-	cout << "Time passed in miliseconds: " << dataOpencv.time << endl;
+	//Initalize some constants and parameters
+	vector<string>::const_iterator ground_truth_file = ground_truth_filenames->begin() + 2;
+	int frame = 1;
+	const int MAX_POINTS = 250;
 
 
+	// Iterate through image files and calculate optical flow
+	for (vector<string>::const_iterator image_file = image_filenames->begin() + 2; image_file != (image_filenames->end() - 1); image_file++)
+	{
+		cout << "Frames " << frame << " - " << frame + 1 << endl;
+
+		const char *first_image = (*image_file).c_str();
+		const char *second_image = (*(image_file + 1)).c_str();
+		const char *ground_truth = (*ground_truth_file).c_str();
+		ground_truth_file++;
+		frame++;
+		stringstream save_path;
+		string type = ".jpg";
+
+		//Find good points to track
+		Mat current_frame = imread(first_image, IMREAD_GRAYSCALE);
+		vector<Point2f> points; //typedef Point_<float> Point2f;
+
+		goodFeaturesToTrack(current_frame, points, MAX_POINTS, 0.01, 10, Mat(),	3, 0, 0.04);
+
+		/*
+		 cout << "Points for both algorithms (column -- row)" << endl;
+		 cout << "size : " << currPoints.size() << endl;
+		 for (unsigned int i = 0; i != currPoints.size(); i++)
+		 cout << currPoints[i].x << "   " << currPoints[i].y << endl;
+		 */
+
+		// Initalize containers for optical flow results
+		  dataOpencv, dataPaparazzi, dataOpencvPyr;
+
+		// Calculate flow
+		optFlow_paparazzi(first_image, second_image, ground_truth, points, dataPaparazzi);
+		optFlow_opencv(first_image, second_image, ground_truth, points, 2, dataOpencv);
+
+		// Output flow to console
+		cout << endl;
+		cout << "Starting number of points: " << points.size() << endl;
+		cout << endl;
+		cout << "Paparazzi results: " << endl;
+		cout << "Number of points left: " << dataPaparazzi.points_left << endl;
+		cout << "Average magnitude error: " << dataPaparazzi.magErr << endl;
+		cout << "Average angular error: " << dataPaparazzi.angErr << endl;
+		cout << "Time passed in miliseconds: " << dataPaparazzi.time << endl;
+
+		cout << endl;
+		cout << "OpenCV results: " << endl;
+		cout << "Number of points left: " << dataOpencv.points_left << endl;
+		cout << "Average magnitude error: " << dataOpencv.magErr << endl;
+		cout << "Average angular error: " << dataOpencv.angErr << endl;
+		cout << "Time passed in miliseconds: " << dataOpencv.time << endl;
+		cout << "=====================================================" << endl;
+
+		// Illustrate optical flow
+		namedWindow("Paparazzi optical flow", WINDOW_AUTOSIZE);
+		namedWindow("OpenCV optical flow", WINDOW_AUTOSIZE);
+		imshow("Paparazzi optical flow", dataPaparazzi.flow_viz);
+		imshow("OpenCV optical flow", dataOpencv.flow_viz);
+		waitKey();
 
 
+		/*save_path << output_dir << "/paparazzi/flow_" << frame -1 << type;
+		string filename = save_path.str();
+		imwrite(filename, dataPaparazzi.flow_viz);
+		save_path.str("");*/
 
+//		save_path << output_dir << "/opencv/flow_" << frame - 1 << type;
+//		filename = save_path.str();
+//		imwrite(filename, dataOpencv.flow_viz);
+//		save_path.str("");
 
-
-	namedWindow("Paparazzi optical flow", WINDOW_AUTOSIZE);
-	namedWindow("OpenCV optical flow", WINDOW_AUTOSIZE);
-
-	imshow("Paparazzi optical flow", dataPaparazzi.flow_viz);
-	imshow("OpenCV optical flow", dataOpencv.flow_viz);
-
-	waitKey();
+	}
 
 	return 0;
 }

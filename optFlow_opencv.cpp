@@ -21,7 +21,7 @@ using namespace cv;
 using namespace std;
 
 
-void optFlow_opencv(char* curImagePath, char* nextImagePath, char* groundTruthPath, const vector<Point2f>& currPoints, int pyrLevel, flowResults& results )
+void optFlow_opencv(const char* curImagePath, const char* nextImagePath, const char* groundTruthPath, const vector<Point2f>& currPoints, int pyrLevel, flowResults& results )
 {
 	TermCriteria termcrit(TermCriteria::COUNT | TermCriteria::EPS, 20, 0.03);
 	Size subPixWinSize(10, 10), winSize(31, 31);
@@ -56,7 +56,7 @@ void optFlow_opencv(char* curImagePath, char* nextImagePath, char* groundTruthPa
 	flow_t_ var;
 	//DEBUG Output current feature locations and next feature locations
 	//cout << "Format: row -- column" << endl;
-	for (vector<Point2f>::size_type i = 0; i!= currPoints.size(); i++){
+	for (vector<Point2f>::size_type i = 0; i!= nextPoints.size(); i++){
 		//cout << currPoints[i].y << "--" << currPoints[i].x << "        " << nextPoints[i].y << "--" << nextPoints[i].x << endl;
 		var.pos.x = currPoints[i].x;
 		var.pos.y = currPoints[i].y;
@@ -64,6 +64,7 @@ void optFlow_opencv(char* curImagePath, char* nextImagePath, char* groundTruthPa
 		var.flow_y = nextPoints[i].y - currPoints[i].y;
 		lk_flow.push_back(var);
 	}
+	results.points_left = nextPoints.size();
 
 	calcErrorMetrics(groundTruthPath, lk_flow, results.angErr, results.magErr);
 

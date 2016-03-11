@@ -1,21 +1,12 @@
-main.o: ../main.cpp ../lucas_kanade.h ../std.h ../message_pragmas.h \
- ../image.h ../showFlow.h ../readGroundTruth.h ../calcErrorMetrics.h \
- ../optFlow_opencv.h ../optFlow_paparazzi.h
+main.o: ../main.cpp ../read_dir_contents.h ../optFlow_opencv.h \
+ ../calcErrorMetrics.h ../readGroundTruth.h ../optFlow_paparazzi.h
 
-../lucas_kanade.h:
+../read_dir_contents.h:
 
-../std.h:
-
-../message_pragmas.h:
-
-../image.h:
-
-../showFlow.h:
-
-../readGroundTruth.h:
+../optFlow_opencv.h:
 
 ../calcErrorMetrics.h:
 
-../optFlow_opencv.h:
+../readGroundTruth.h:
 
 ../optFlow_paparazzi.h:
