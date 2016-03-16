@@ -21,7 +21,8 @@ using namespace cv;
 using namespace std;
 
 
-void optFlow_opencv(const char* curImagePath, const char* nextImagePath, const char* groundTruthPath, const vector<Point2f>& currPoints, int pyrLevel, flowResults& results )
+void optFlow_opencv(const char* curImagePath, const char* nextImagePath, const char* groundTruthPath, const vector<Point2f>& currPoints,
+		int pyrLevel, flowResults& results, bool HAVE_GROUND_TRUTH )
 {
 	TermCriteria termcrit(TermCriteria::COUNT | TermCriteria::EPS, 20, 0.03);
 	Size subPixWinSize(10, 10), winSize(10, 10);
@@ -54,7 +55,7 @@ void optFlow_opencv(const char* curImagePath, const char* nextImagePath, const c
 	cout << "Total number of points: "<< currPoints.size() << endl;*/
 	double min, max;
 	minMaxLoc(err, &min, &max);
-	double error_threshold = max / 4;
+	double error_threshold = max / 2;
 
 	for (vector<Point2f>::size_type i = 0; i!= currPoints.size(); i++){
 		//cout << currPoints[i].y << "--" << currPoints[i].x << "        " << nextPoints[i].y << "--" << nextPoints[i].x << endl;
@@ -75,7 +76,8 @@ void optFlow_opencv(const char* curImagePath, const char* nextImagePath, const c
 		cout << *it << endl;
 	cout << endl;
 */
-	calcErrorMetrics(groundTruthPath, lk_flow, results.angErr, results.magErr);
+	if (HAVE_GROUND_TRUTH)
+		calcErrorMetrics(groundTruthPath, lk_flow, results.angErr, results.magErr);
 
 	results.points_left = lk_flow.size();
 	results.flow_viz = showFlow(currFrame, nextFrame, curImagePath, lk_flow);

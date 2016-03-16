@@ -43,7 +43,7 @@ all: OptFlow\ compare
 OptFlow\ compare: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C++ Linker'
-	g++ -L/usr/local/lib -o "OptFlow compare" $(OBJS) $(USER_OBJS) $(LIBS)
+	g++ -L/usr/local/lib -pg -o "OptFlow compare" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
