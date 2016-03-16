@@ -59,7 +59,7 @@ void optFlow_paparazzi(const char* curImagePath, const char* nextImagePath, cons
 	}
 
 	uint16_t numTracked = (sizeof(corners)/sizeof(*corners));
-	uint16_t window_size = 10;
+	uint16_t window_size = 31;
 	uint16_t subpixel_factor = 10;
 	uint8_t max_iterations = 10;
 	uint8_t step_threshold = 2;
