@@ -26,9 +26,9 @@ int main()
 	vector<string> *image_filenames;
 	vector<string> *ground_truth_filenames;
 
-	image_filenames = listdir("/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSequence2/images");
-	ground_truth_filenames = listdir("/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSequence2/ground_truth");
-	string output_dir = "/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSequence2/output";
+	image_filenames = listdir("/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSequence4/images");
+	ground_truth_filenames = listdir("/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSequence4/ground_truth");
+	string output_dir = "/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSequence4/output";
 
 
 	//Initalize some constants and parameters
@@ -41,17 +41,20 @@ int main()
 	vector<string>::const_iterator ground_truth_file = ground_truth_filenames->begin() + 2;
 	int frame = 1;
 	const int MAX_POINTS = 150;
-	ofstream pointCount, avgMagErr, avgAngErr;
+	ofstream pointCount, avgMagErr, avgAngErr, time;
 
 	if (RESULTS_TO_FILE) {
 		pointCount.open(
-				"/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSequence2/results/pointCount.txt",
+				"/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSequence4/results/pointCount.txt",
 				std::ofstream::out | std::ofstream::trunc);
 		avgMagErr.open(
-				"/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSequence2/results/avgMagErr.txt",
+				"/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSequence4/results/avgMagErr.txt",
 				std::ofstream::out | std::ofstream::trunc);
 		avgAngErr.open(
-				"/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSequence2/results/avgAngErr.txt",
+				"/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSequence4/results/avgAngErr.txt",
+				std::ofstream::out | std::ofstream::trunc);
+		time.open(
+				"/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSequence4/results/time.txt",
 				std::ofstream::out | std::ofstream::trunc);
 	}
 
@@ -145,6 +148,11 @@ int main()
 				avgAngErr << dataPaparazzi.angErr << " " << dataOpencv.angErr << endl;
 			else
 				cout << "Unable to open file";
+
+			if (time.is_open())
+				time << dataPaparazzi.time<< " " << dataOpencv.time << endl;
+			else
+				cout << "Unable to open file";
 		}
 	}
 
@@ -157,6 +165,9 @@ int main()
 
 		if (avgAngErr.is_open())
 			avgAngErr.close();
+
+		if (time.is_open())
+			time.close();
 	}
 
 	return 0;
