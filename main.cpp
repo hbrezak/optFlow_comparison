@@ -26,9 +26,9 @@ int main()
 	vector<string> *image_filenames;
 	vector<string> *ground_truth_filenames;
 
-	image_filenames = listdir("/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSequence4/images");
-	ground_truth_filenames = listdir("/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSequence4/ground_truth");
-	string output_dir = "/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSequence4/output";
+	image_filenames = listdir("/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSequence3/images");
+	ground_truth_filenames = listdir("/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSequence3/ground_truth");
+	string output_dir = "/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSequence3/output";
 
 
 	//Initalize some constants and parameters
@@ -36,7 +36,7 @@ int main()
 	bool SHOW_FLOW = false;
 	bool SAVE_FLOW_IMAGES = false;
 	bool PRINT_DEBUG_STUFF = true;
-	bool RESULTS_TO_FILE = true;
+	bool RESULTS_TO_FILE = false;
 
 	vector<string>::const_iterator ground_truth_file = ground_truth_filenames->begin() + 2;
 	int frame = 1;
@@ -99,15 +99,19 @@ int main()
 			cout << endl;
 			cout << "Paparazzi results: " << endl;
 			cout << "Number of points left: " << dataPaparazzi.points_left<< endl;
-			cout << "Average magnitude error: " << dataPaparazzi.magErr << endl;
-			cout << "Average angular error: " << dataPaparazzi.angErr << endl;
+			if (HAVE_GROUND_TRUTH) {
+				cout << "Average magnitude error: " << dataPaparazzi.magErr	<< endl;
+				cout << "Average angular error: " << dataPaparazzi.angErr << endl;
+			}
 			cout << "Time passed in miliseconds: " << dataPaparazzi.time<< endl;
 
 			cout << endl;
 			cout << "OpenCV results: " << endl;
 			cout << "Number of points left: " << dataOpencv.points_left << endl;
-			cout << "Average magnitude error: " << dataOpencv.magErr << endl;
-			cout << "Average angular error: " << dataOpencv.angErr << endl;
+			if (HAVE_GROUND_TRUTH) {
+				cout << "Average magnitude error: " << dataOpencv.magErr << endl;
+				cout << "Average angular error: " << dataOpencv.angErr << endl;
+			}
 			cout << "Time passed in miliseconds: " << dataOpencv.time << endl;
 			cout << "====================================================="
 					<< endl;
