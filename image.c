@@ -293,7 +293,7 @@ void pyramid_next_level(struct image_t *input, struct image_t *output, uint8_t b
 
 	uint16_t row, col; // coordinates of the central pixel; pixel being calculated in input matrix; center of filer matrix
 	uint16_t w = input->w;
-	float sum = 0;
+	int32_t sum = 0;
 
 	for (uint16_t i = 0; i != output->h; i++){
 
@@ -301,17 +301,40 @@ void pyramid_next_level(struct image_t *input, struct image_t *output, uint8_t b
 			row = border_size + 2 * i; // First skip border, then every second pixel
 			col = border_size + 2 * j;
 
-			sum =  0.0039*input_buf[(row -2)*w + (col -2)] + 0.0156*input_buf[(row -2)*w + (col -1)] + 0.0234*input_buf[(row -2)*w + (col)];
-			sum += 0.0156*input_buf[(row -2)*w + (col +1)] + 0.0039*input_buf[(row -2)*w + (col +2)] + 0.0156*input_buf[(row -1)*w + (col -2)];
-			sum += 0.0625*input_buf[(row -1)*w + (col -1)] + 0.0938*input_buf[(row -1)*w + (col)]    + 0.0625*input_buf[(row -1)*w + (col +1)];
-			sum += 0.0156*input_buf[(row -1)*w + (col +2)] + 0.0234*input_buf[(row)*w    + (col -2)] + 0.0938*input_buf[(row)*w    + (col -1)];
-			sum += 0.1406*input_buf[(row)*w    + (col)]    + 0.0938*input_buf[(row)*w    + (col +1)] + 0.0234*input_buf[(row)*w    + (col +2)];
-			sum += 0.0156*input_buf[(row +1)*w + (col -2)] + 0.0625*input_buf[(row +1)*w + (col -1)] + 0.0938*input_buf[(row +1)*w + (col)];
-			sum += 0.0625*input_buf[(row +1)*w + (col +1)] + 0.0156*input_buf[(row +1)*w + (col +2)] + 0.0039*input_buf[(row +2)*w + (col -2)];
-			sum += 0.0156*input_buf[(row +2)*w + (col -1)] + 0.0234*input_buf[(row +2)*w + (col)]    + 0.0156*input_buf[(row +2)*w + (col +1)];
-			sum += 0.0039*input_buf[(row +2)*w + (col +2)];
+			sum = 39 * ( input_buf[(row -2)*w + (col -2)] + input_buf[(row -2)*w + (col +2)] + input_buf[(row +2)*w + (col -2)] + input_buf[(row +2)*w + (col +2)]);
+			sum += 156 * ( input_buf[(row -2)*w + (col -1)] + input_buf[(row -2)*w + (col +1)] + input_buf[(row -1)*w + (col +2)] + input_buf[(row +1)*w + (col -2)]
+							 + input_buf[(row +1)*w + (col +2)] + input_buf[(row +2)*w + (col -1)] + input_buf[(row +2)*w + (col +1)] + input_buf[(row -1)*w + (col -2)]);
+			sum += 234 * ( input_buf[(row -2)*w + (col)] + input_buf[(row)*w    + (col -2)] + input_buf[(row)*w    + (col +2)] + input_buf[(row +2)*w + (col)]);
+			sum += 625 * ( input_buf[(row -1)*w + (col -1)] + input_buf[(row -1)*w + (col +1)] + input_buf[(row +1)*w + (col -1)] + input_buf[(row +1)*w + (col +1)]);
+			sum += 938 * ( input_buf[(row -1)*w + (col)] + input_buf[(row)*w    + (col -1)] + input_buf[(row)*w    + (col +1)] + input_buf[(row +1)*w + (col)]);
+			sum += 1406 * input_buf[(row)*w    + (col)];
 
-			output_buf[i*output->w + j] = round(sum);
+
+
+/*
+			sum = 0.0039 * ( input_buf[(row -2)*w + (col -2)] + input_buf[(row -2)*w + (col +2)] + input_buf[(row +2)*w + (col -2)] + input_buf[(row +2)*w + (col +2)]);
+			sum += 0.0156 * ( input_buf[(row -2)*w + (col -1)] + input_buf[(row -2)*w + (col +1)] + input_buf[(row -1)*w + (col +2)] + input_buf[(row +1)*w + (col -2)]
+					+ input_buf[(row +1)*w + (col +2)] + input_buf[(row +2)*w + (col -1)] + input_buf[(row +2)*w + (col +1)] + input_buf[(row -1)*w + (col -2)]);
+			sum += 0.0234 * ( input_buf[(row -2)*w + (col)] + input_buf[(row)*w    + (col -2)] + input_buf[(row)*w    + (col +2)] + input_buf[(row +2)*w + (col)]);
+			sum += 0.0625 * ( input_buf[(row -1)*w + (col -1)] + input_buf[(row -1)*w + (col +1)] + input_buf[(row +1)*w + (col -1)] + input_buf[(row +1)*w + (col +1)]);
+			sum += 0.0938 * ( input_buf[(row -1)*w + (col)] + input_buf[(row)*w    + (col -1)] + input_buf[(row)*w    + (col +1)] + input_buf[(row +1)*w + (col)]);
+			sum += 0.1406 * input_buf[(row)*w    + (col)];
+*/
+
+
+/*
+			sum =  0.0039*input_buf[(row -2)*w + (col -2)] + 0.0156*input_buf[(row -2)*w + (col -1)] + 0.0234*input_buf[(row -2)*w + (col)];
+						sum += 0.0156*input_buf[(row -2)*w + (col +1)] + 0.0039*input_buf[(row -2)*w + (col +2)] + 0.0156*input_buf[(row -1)*w + (col -2)];
+						sum += 0.0625*input_buf[(row -1)*w + (col -1)] + 0.0938*input_buf[(row -1)*w + (col)]    + 0.0625*input_buf[(row -1)*w + (col +1)];
+						sum += 0.0156*input_buf[(row -1)*w + (col +2)] + 0.0234*input_buf[(row)*w    + (col -2)] + 0.0938*input_buf[(row)*w    + (col -1)];
+						sum += 0.1406*input_buf[(row)*w    + (col)]    + 0.0938*input_buf[(row)*w    + (col +1)] + 0.0234*input_buf[(row)*w    + (col +2)];
+						sum += 0.0156*input_buf[(row +1)*w + (col -2)] + 0.0625*input_buf[(row +1)*w + (col -1)] + 0.0938*input_buf[(row +1)*w + (col)];
+						sum += 0.0625*input_buf[(row +1)*w + (col +1)] + 0.0156*input_buf[(row +1)*w + (col +2)] + 0.0039*input_buf[(row +2)*w + (col -2)];
+						sum += 0.0156*input_buf[(row +2)*w + (col -1)] + 0.0234*input_buf[(row +2)*w + (col)]    + 0.0156*input_buf[(row +2)*w + (col +1)];
+						sum += 0.0039*input_buf[(row +2)*w + (col +2)];
+*/
+			output_buf[i*output->w + j] = sum / 10000;
+			//printf("output buf %u \n", output_buf[i*output->w + j]);
 		}
 	}
 }
@@ -400,15 +423,16 @@ void image_subpixel_window(struct image_t *input, struct image_t *output, struct
         uint32_t alpha_y = (y - tl_y); // CHANGED for (100 000) 16 -> 32
         //printf("alpha_x %u, alpha_y %u \n", alpha_x, alpha_y); // works (numbers below 1000);
 
-        // Blend from the 4 surrounding pixels
-        uint64_t blend = (uint64_t)(subpixel_factor - alpha_x) * (subpixel_factor - alpha_y) * input_buf[input->w * orig_y + orig_x];
+        // Blend from the 4 surrounding pixels; if int32 - max value of subfixel factor is 1000; for more convert and cast each line
+        //	to int64
+        uint32_t blend = (subpixel_factor - alpha_x) * (subpixel_factor - alpha_y) * input_buf[input->w * orig_y + orig_x];
        // printf("*Blend 1: %lu \n", blend);
-        blend += (uint64_t)alpha_x * (subpixel_factor - alpha_y) * input_buf[input->w * orig_y + (orig_x + 1)];
+        blend += alpha_x * (subpixel_factor - alpha_y) * input_buf[input->w * orig_y + (orig_x + 1)];
        // printf("**Blend 2: %lu \n", blend);
-        blend += (uint64_t)(subpixel_factor - alpha_x) * alpha_y * input_buf[input->w * (orig_y + 1) + orig_x];
+        blend += (subpixel_factor - alpha_x) * alpha_y * input_buf[input->w * (orig_y + 1) + orig_x];
         //printf("***Blend 3: %lu \n", blend);
-        blend += (uint64_t)alpha_x * alpha_y * input_buf[input->w * (orig_y + 1) + (orig_x + 1)]; // this casting fixed blend overflow
-      // printf("****Blend 4: %lu \n", blend);
+        blend += alpha_x * alpha_y * input_buf[input->w * (orig_y + 1) + (orig_x + 1)]; // this casting fixed blend overflow
+       //printf("****Blend 4: %lu \n", blend);
 
         //printf("first row: %u, %u %u \n", (subpixel_factor - alpha_x), (subpixel_factor - alpha_y), input_buf[input->w * orig_y + orig_x]);
        /* printf("second row: %u, %u %u \n", alpha_x, (subpixel_factor - alpha_y), input_buf[input->w * orig_y + (orig_x + 1)]);
@@ -420,7 +444,7 @@ void image_subpixel_window(struct image_t *input, struct image_t *output, struct
         //printf("Blend: %lu \n", blend); //not overflowing for s_f 1000 but on 100 million
 
         // Set the normalized pixel blend
-        output_buf[output->w * j + i] = blend / ((uint64_t)subpixel_factor * subpixel_factor);
+        output_buf[output->w * j + i] = blend / (subpixel_factor * subpixel_factor);
         //printf("output to I/J %lu \n", blend / ((uint64_t)subpixel_factor * subpixel_factor)); // values 0-255
       }
     }

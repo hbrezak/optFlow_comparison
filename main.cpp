@@ -63,6 +63,7 @@ int main()
 	{
 		//if (PRINT_DEBUG_STUFF)
 			cout << "Frames " << frame << " - " << frame + 1 << endl;
+			//if (frame == 2)break;
 
 		const char *first_image = (*image_file).c_str();
 		const char *second_image = (*(image_file + 1)).c_str();
