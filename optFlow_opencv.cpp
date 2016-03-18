@@ -43,6 +43,12 @@ void optFlow_opencv(const char* curImagePath, const char* nextImagePath, const c
 		throw invalid_argument ("Images have not loaded properly!");
 
 
+	/*cout << "OpenCV points (column -- row)" << endl;
+	cout << "size : " << currPoints.size() << endl;
+	for (unsigned int i = 0; i != currPoints.size(); i++)
+		cout << i << "    " << currPoints[i].x << "   " << currPoints[i].y << endl;*/
+
+
 	//Based on selected features find their position in next frame
 	double time = (double)getTickCount();
 	calcOpticalFlowPyrLK(currFrame, nextFrame, currPoints, nextPoints, status, err, winSize, pyrLevel, termcrit, 0, 0.001);

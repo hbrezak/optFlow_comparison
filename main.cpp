@@ -18,6 +18,19 @@
 #include <iostream>
 #include <fstream>
 
+#include "rgb2yuv422.h"
+extern "C" {
+#include "fast_rosten.h"
+#include "image.h"
+}
+
+// algorithms for detecting trackable features in images
+enum find_points{
+	GOOD_FEATURES,	// use openCV algorith goodFeaturesToTrack
+	FAST			// use FAST algorithm
+};
+
+
 using namespace cv;
 using namespace std;
 
@@ -26,6 +39,7 @@ int main()
 	vector<string> *image_filenames;
 	vector<string> *ground_truth_filenames;
 
+
 	image_filenames = listdir("/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSequence3/images");
 	ground_truth_filenames = listdir("/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSequence3/ground_truth");
 	string output_dir = "/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSequence3/output";
@@ -33,14 +47,16 @@ int main()
 
 	//Initalize some constants and parameters
 	bool HAVE_GROUND_TRUTH = true;
-	bool SHOW_FLOW = false;
+	bool SHOW_FLOW = true;
 	bool SAVE_FLOW_IMAGES = false;
 	bool PRINT_DEBUG_STUFF = true;
 	bool RESULTS_TO_FILE = false;
+	find_points algorithm = FAST;
+	const int MAX_POINTS = 150;
 
 	vector<string>::const_iterator ground_truth_file = ground_truth_filenames->begin() + 2;
 	int frame = 1;
-	const int MAX_POINTS = 150;
+
 	ofstream pointCount, avgMagErr, avgAngErr, time;
 
 	if (RESULTS_TO_FILE) {
@@ -73,24 +89,75 @@ int main()
 		stringstream save_path;
 		string type = ".jpg";
 
-		//Find good points to track
-		Mat current_frame = imread(first_image, IMREAD_GRAYSCALE);
-		vector<Point2f> points; //typedef Point_<float> Point2f;
+		Mat current_frame;
+		vector<Point2f> points;
 
-		goodFeaturesToTrack(current_frame, points, MAX_POINTS, 0.01, 10, Mat(),	3, 0, 0.04);
+		switch (algorithm) {
+		case GOOD_FEATURES:
+		{
+			//Find good points to track
+			current_frame = imread(first_image, IMREAD_GRAYSCALE);
+			goodFeaturesToTrack(current_frame, points, MAX_POINTS, 0.01, 10, Mat(), 3, 0, 0.04);
+			break;
+		}
 
-		/*
-		 cout << "Points for both algorithms (column -- row)" << endl;
-		 cout << "size : " << currPoints.size() << endl;
-		 for (unsigned int i = 0; i != currPoints.size(); i++)
-		 cout << currPoints[i].x << "   " << currPoints[i].y << endl;
-		 */
+		case FAST:
+		{
+			current_frame = imread(first_image, CV_LOAD_IMAGE_COLOR);
+
+			image_t current_YUV;
+			image_create(&current_YUV, uint16_t(current_frame.cols), uint16_t(current_frame.rows), IMAGE_YUV422);
+
+			// Convert RGB image to YUV 4:2:2 format and place it in curYUV/nextYUV
+			if (rgb2yuv422(current_frame, &current_YUV)) {
+				printf("Image conversion failed! Exiting...");
+				break;
+			}
+
+			// Create grayscale image from yuv image
+			image_t current_gray_YUV;
+			image_create(&current_gray_YUV, current_YUV.w, current_YUV.h, IMAGE_GRAYSCALE);
+			image_to_grayscale(&current_YUV, &current_gray_YUV);
+			uint16_t corner_cnt;
+
+			// FAST corner detection (TODO: non fixed threshold)
+			struct point_t *corners = fast9_detect(&current_gray_YUV, 20, 20, 0, 0, &corner_cnt);
+
+			float skip_points =	(corner_cnt > MAX_POINTS) ? (float)corner_cnt / MAX_POINTS : 1;
+			uint16_t p;
+
+			for (uint16_t i = 0; i < MAX_POINTS && i < corner_cnt; i++) {
+				Point2f temp;
+				p = i * skip_points;
+				temp.x = corners[p].x; // column
+				temp.y = corners[p].y; // row
+				points.push_back(temp);
+			}
+
+			image_free(&current_YUV);
+			image_free(&current_gray_YUV);
+			break;
+		}
+
+		default:
+			cout << "Error - please select algorithm for finding features."	<< endl;
+			break;
+		}
+
+
+		/*cout << "Points for both algorithms (column -- row)" << endl;
+		cout << "size : " << points.size() << endl;
+		for (unsigned int i = 0; i != points.size(); i++)
+			cout << i << "    " << points[i].x << "   " << points[i].y << endl;*/
+
+
+
 
 		// Initalize containers for optical flow results
 		flowResults dataOpencv, dataPaparazzi, dataOpencvPyr;
 
 		// Calculate flow
-		optFlow_paparazzi(first_image, second_image, ground_truth, points, dataPaparazzi, HAVE_GROUND_TRUTH);
+		optFlow_paparazzi(first_image, second_image, ground_truth, points, dataPaparazzi, MAX_POINTS, HAVE_GROUND_TRUTH);
 		optFlow_opencv(first_image, second_image, ground_truth, points, 2, dataOpencv, HAVE_GROUND_TRUTH);
 
 		// Output flow to console
@@ -159,6 +226,8 @@ int main()
 			else
 				cout << "Unable to open file";
 		}
+
+
 	}
 
 	if (RESULTS_TO_FILE) {

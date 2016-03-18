@@ -25,7 +25,7 @@ using namespace cv;
 using namespace std;
 
 void optFlow_paparazzi(const char* curImagePath, const char* nextImagePath, const char* groundTruthPath, const vector<Point2f>& points,
-		flowResults& results, bool HAVE_GROUND_TRUTH)
+		flowResults& results, const int MAX_POINTS, bool HAVE_GROUND_TRUTH)
 {
 	Mat curImg = imread(curImagePath, CV_LOAD_IMAGE_COLOR);
 	Mat nextImg = imread(nextImagePath, CV_LOAD_IMAGE_COLOR);
@@ -69,7 +69,7 @@ void optFlow_paparazzi(const char* curImagePath, const char* nextImagePath, cons
 	uint8_t max_iterations = 20;
 	uint8_t step_threshold = 3;
 	uint8_t pyramid_level = 2; // 0 for no pyramids
-	uint16_t max_track_corners = sizeof(corners)/sizeof(*corners);
+	uint16_t max_track_corners = MAX_POINTS;
 	vector<flow_t_> lk_flow;
 	flow_t_ var;
 
@@ -79,6 +79,11 @@ void optFlow_paparazzi(const char* curImagePath, const char* nextImagePath, cons
 		 * 	uint8_t max_iterations = 40;
 		 * 	uint8_t step_threshold = 0.03;
 	*/
+
+	/*cout << "Paparazzi points (column -- row)" << endl;
+		cout << "size : " << points.size() << endl;
+		for (unsigned int i = 0; i != points.size(); i++)
+			cout << i << "    " << points[i].x << "   " << points[i].y << endl;*/
 
 
 	double time = (double)getTickCount();

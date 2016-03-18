@@ -108,20 +108,21 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 		uint16_t new_p = 0;
 
 		// Calculate the amount of points to skip - disabled until needed
-		//float skip_points =	(points_orig > max_points) ? points_orig / max_points : 1;
-		//printf("\nBased on max_points input, I'm skipping %f points(1 == none). \n", skip_points); //ADDED
+		float skip_points =	(points_orig > max_points) ? (float)points_orig / max_points : 1;
+		//printf("\nBased on max_points input, I'm skipping %f points(1 == none) %u %u. \n", skip_points, points_orig,max_points); //ADDED
 		//CONC : I don't want to skip any points and result of skip_points is then appropriate
 
 		// Go through all points
 		for (uint16_t i = 0; i < max_points && i < points_orig; i++)
 		{
-			//uint16_t p = i ;//* skip_points; - disabled until needed
+			uint16_t p = i * skip_points;
+			//printf("point %u (%u) : %u %u \n", i, p, points[p].x, points[p].y);
 
 			if (LVL == pyramid_level)
 			{
 				// Convert the point to a subpixel coordinate
-				vectors[new_p].pos.x = (points[i].x * subpixel_factor) >> pyramid_level; // use bitwise shift for division
-				vectors[new_p].pos.y = (points[i].y * subpixel_factor) >> pyramid_level;
+				vectors[new_p].pos.x = (points[p].x * subpixel_factor) >> pyramid_level; // use bitwise shift for division
+				vectors[new_p].pos.y = (points[p].y * subpixel_factor) >> pyramid_level;
 				vectors[new_p].flow_x = 0;
 				vectors[new_p].flow_y = 0;
 				//printf("Convert point %u %u to subpix: %u, %u \n", points[i].x, points[i].y, vectors[new_p].pos.x,  vectors[new_p].pos.y);
@@ -132,10 +133,10 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 				// Convert last pyramid level flow into this pyramid level flow guess
 				//printf("2nd pyr lvl: pos x %u, flow x %d \n", vectors[new_p].pos.x, vectors[new_p].flow_x);
 
-				vectors[new_p].pos.x = vectors[i].pos.x << 1;
-				vectors[new_p].pos.y = vectors[i].pos.y << 1;
-				vectors[new_p].flow_x = vectors[i].flow_x << 1;
-				vectors[new_p].flow_y = vectors[i].flow_y << 1;
+				vectors[new_p].pos.x = vectors[p].pos.x << 1;
+				vectors[new_p].pos.y = vectors[p].pos.y << 1;
+				vectors[new_p].flow_x = vectors[p].flow_x << 1;
+				vectors[new_p].flow_y = vectors[p].flow_y << 1;
 
 				//printf("%u x %u, pos y %u, flowx %d, flowy %d \n", i, vectors[new_p].pos.x, vectors[new_p].pos.y,vectors[new_p].flow_x, vectors[new_p].flow_y );
 				//sleep(1);
