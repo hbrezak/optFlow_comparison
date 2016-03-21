@@ -39,20 +39,20 @@ int main()
 	vector<string> *image_filenames;
 	vector<string> *ground_truth_filenames;
 
-
-	image_filenames = listdir("/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSequence3/images");
-	ground_truth_filenames = listdir("/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSequence3/ground_truth");
-	string output_dir = "/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSequence3/output";
+	string testset_dir = "/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSequence3";
+	image_filenames = listdir(testset_dir + "/images");
+	ground_truth_filenames = listdir(testset_dir + "/ground_truth");
+	string output_dir = testset_dir + "/output";
 
 
 	//Initalize some constants and parameters
+	find_points algorithm  = FAST;
 	bool HAVE_GROUND_TRUTH = true;
-	bool SHOW_FLOW = true;
-	bool SAVE_FLOW_IMAGES = false;
+	bool SHOW_FLOW         = true;
+	bool SAVE_FLOW_IMAGES  = false;
 	bool PRINT_DEBUG_STUFF = true;
-	bool RESULTS_TO_FILE = false;
-	find_points algorithm = FAST;
-	const int MAX_POINTS = 150;
+	bool RESULTS_TO_FILE   = false;
+	const int MAX_POINTS   = 150;
 
 	vector<string>::const_iterator ground_truth_file = ground_truth_filenames->begin() + 2;
 	int frame = 1;
@@ -60,17 +60,22 @@ int main()
 	ofstream pointCount, avgMagErr, avgAngErr, time;
 
 	if (RESULTS_TO_FILE) {
+		string pointCount_dir = testset_dir + "/results/pointCount.txt";
+		string avgMagErr_dir = testset_dir + "/results/avgMagErr.txt";
+		string avgAngErr_dir = testset_dir + "/results/avgAngErr.txt";
+		string time_dir = testset_dir + "/results/time.txt";
+
 		pointCount.open(
-				"/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSequence4/results/pointCount.txt",
+				pointCount_dir.c_str(),
 				std::ofstream::out | std::ofstream::trunc);
 		avgMagErr.open(
-				"/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSequence4/results/avgMagErr.txt",
+				avgMagErr_dir.c_str(),
 				std::ofstream::out | std::ofstream::trunc);
 		avgAngErr.open(
-				"/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSequence4/results/avgAngErr.txt",
+				avgAngErr_dir.c_str(),
 				std::ofstream::out | std::ofstream::trunc);
 		time.open(
-				"/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSequence4/results/time.txt",
+				time_dir.c_str(),
 				std::ofstream::out | std::ofstream::trunc);
 	}
 
