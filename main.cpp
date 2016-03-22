@@ -24,6 +24,7 @@ extern "C" {
 #include "image.h"
 }
 
+
 // algorithms for detecting trackable features in images
 enum find_points{
 	GOOD_FEATURES,	// use openCV algorith goodFeaturesToTrack
@@ -39,7 +40,7 @@ int main()
 	vector<string> *image_filenames;
 	vector<string> *ground_truth_filenames;
 
-	string testset_dir = "/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSequence3";
+	string testset_dir = "/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSequence2";
 	image_filenames = listdir(testset_dir + "/images");
 	ground_truth_filenames = listdir(testset_dir + "/ground_truth");
 	string output_dir = testset_dir + "/output";
@@ -47,13 +48,13 @@ int main()
 
 	//Initalize some constants and parameters
 	find_points algorithm  = FAST;
-	bool HAVE_GROUND_TRUTH = true;
-	bool SHOW_FLOW         = true;
-	bool SAVE_FLOW_IMAGES  = false;
-	bool PRINT_DEBUG_STUFF = true;
-	bool RESULTS_TO_FILE   = false;
-	const int MAX_POINTS   = 150;
-
+	bool HAVE_GROUND_TRUTH = 1;
+	bool SHOW_FLOW         = 0;
+	bool SAVE_FLOW_IMAGES  = 0;
+	bool PRINT_DEBUG_STUFF = 1;
+	bool RESULTS_TO_FILE   = 0;
+	const int MAX_POINTS   = 25;
+	int thres = 20;
 	vector<string>::const_iterator ground_truth_file = ground_truth_filenames->begin() + 2;
 	int frame = 1;
 
@@ -97,6 +98,7 @@ int main()
 		Mat current_frame;
 		vector<Point2f> points;
 
+
 		switch (algorithm) {
 		case GOOD_FEATURES:
 		{
@@ -126,7 +128,20 @@ int main()
 			uint16_t corner_cnt;
 
 			// FAST corner detection (TODO: non fixed threshold)
-			struct point_t *corners = fast9_detect(&current_gray_YUV, 20, 20, 0, 0, &corner_cnt);
+			struct point_t *corners = fast9_detect(&current_gray_YUV, thres, 20, 0, 0, &corner_cnt);
+			//printf("FAST points num: %u threshold: %d \n", corner_cnt, thres);
+
+			 // Adaptive threshold
+			if (1) {
+
+				// Decrease and increase the threshold based on previous values
+				if (corner_cnt < 40 && thres > 5) {
+					thres--;
+				} else if (corner_cnt > 50 && thres < 60) {
+					thres++;
+				}
+
+			}
 
 			float skip_points =	(corner_cnt > MAX_POINTS) ? (float)corner_cnt / MAX_POINTS : 1;
 			uint16_t p;
