@@ -246,8 +246,6 @@ int main()
 			else
 				cout << "Unable to open file";
 		}
-
-
 	}
 
 	if (RESULTS_TO_FILE) {
