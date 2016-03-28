@@ -58,7 +58,7 @@
  * @return The vectors from the original *points in subpixels
  */
 struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, struct point_t *points, uint16_t *points_cnt, uint16_t half_window_size,
-		uint32_t subpixel_factor, uint8_t max_iterations, uint8_t step_threshold, uint16_t max_points, uint8_t pyramid_level) {
+		uint16_t subpixel_factor, uint8_t max_iterations, uint8_t step_threshold, uint8_t max_points, uint8_t pyramid_level) {
 
 	//CHANGED step_threshold
 	// A straightforward one-level implementation of Lucas-Kanade.
@@ -83,9 +83,10 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 	step_threshold = step_threshold*(subpixel_factor/100);
 	// 3 values related to tracking window size, wont overflow
 
-	// Allocate memory for image pyramids
-	struct image_t *pyramid_old = (struct image_t *)malloc(sizeof(struct image_t) * (pyramid_level+1));
-	struct image_t *pyramid_new = (struct image_t *)malloc(sizeof(struct image_t) * (pyramid_level+1));
+	// Allocate memory for image pyramids - array of structs
+	struct image_t *pyramid_old = malloc(sizeof(struct image_t) * (pyramid_level+1));
+	struct image_t *pyramid_new = malloc(sizeof(struct image_t) * (pyramid_level+1));
+	// struct image_t *pyramid_new = (struct image_t *)malloc(sizeof(struct image_t) * (pyramid_level+1));
 
 	pyramid_build(old_img, pyramid_old, pyramid_level, border_size);
 	pyramid_build(new_img, pyramid_new, pyramid_level, border_size);
@@ -245,6 +246,9 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 		image_free(&pyramid_old[i]);
 		image_free(&pyramid_new[i]);
 	}
+
+	free(pyramid_new);
+	free(pyramid_old);
 	pyramid_old = NULL;
 	pyramid_new = NULL;
 
