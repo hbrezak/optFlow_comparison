@@ -432,7 +432,7 @@ void image_subpixel_window(struct image_t *input, struct image_t *output, struct
         blend += (subpixel_factor - alpha_x) * alpha_y * input_buf[input->w * (orig_y + 1) + orig_x];
         //printf("***Blend 3: %lu \n", blend);
         blend += alpha_x * alpha_y * input_buf[input->w * (orig_y + 1) + (orig_x + 1)]; // this casting fixed blend overflow
-       //printf("****Blend 4: %u \n", blend);
+       //printf("****Blend 4: %lu \n", blend);
 
         //printf("first row: %u, %u %u \n", (subpixel_factor - alpha_x), (subpixel_factor - alpha_y), input_buf[input->w * orig_y + orig_x]);
        /* printf("second row: %u, %u %u \n", alpha_x, (subpixel_factor - alpha_y), input_buf[input->w * orig_y + (orig_x + 1)]);

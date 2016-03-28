@@ -40,7 +40,7 @@ int main()
 	vector<string> *image_filenames;
 	vector<string> *ground_truth_filenames;
 
-	string testset_dir = "/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSequence3";
+	string testset_dir = "/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSequence2";
 	image_filenames = listdir(testset_dir + "/images");
 	ground_truth_filenames = listdir(testset_dir + "/ground_truth");
 	string output_dir = testset_dir + "/output";
@@ -49,7 +49,7 @@ int main()
 	//Initalize some constants and parameters
 	find_points algorithm  = FAST;
 	bool HAVE_GROUND_TRUTH = 1;
-	bool SHOW_FLOW         = 1;
+	bool SHOW_FLOW         = 0;
 	bool SAVE_FLOW_IMAGES  = 0;
 	bool PRINT_DEBUG_STUFF = 1;
 	bool RESULTS_TO_FILE   = 0;
@@ -210,7 +210,7 @@ int main()
 			namedWindow("OpenCV optical flow", WINDOW_AUTOSIZE);
 			imshow("Paparazzi optical flow", dataPaparazzi.flow_viz);
 			imshow("OpenCV optical flow", dataOpencv.flow_viz);
-			waitKey(1);
+			waitKey();
 		}
 
 		if (SAVE_FLOW_IMAGES){
