@@ -59,8 +59,8 @@ struct point_t {
 /* Vector structure for point differences */
 struct flow_t {
   struct point_t pos;         ///< The original position the flow comes from
-  int32_t flow_x;             ///< The x direction flow in subpixels // CHANGED 16 -> 32
-  int32_t flow_y;             ///< The y direction flow in subpixels // CHANGED 16 -> 32
+  int16_t flow_x;             ///< The x direction flow in subpixels // CHANGED 16 -> 32
+  int16_t flow_y;             ///< The y direction flow in subpixels // CHANGED 16 -> 32
 };
 
 /* Usefull image functions */
