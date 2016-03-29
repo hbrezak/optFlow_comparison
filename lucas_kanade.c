@@ -142,6 +142,14 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 				//sleep(1);
 
 			}
+			// If the pixel is outside ROI, do not track it
+			if ((((int32_t) vectors[new_p].pos.x + vectors[new_p].flow_x) < 0)
+				|| ((vectors[new_p].pos.x + vectors[new_p].flow_x) > ((pyramid_new[LVL].w - 1 - 2 * border_size)* subpixel_factor))
+				|| (((int32_t) vectors[new_p].pos.y + vectors[new_p].flow_y) < 0)
+				|| ((vectors[new_p].pos.y + vectors[new_p].flow_y) > ((pyramid_new[LVL].h - 1 - 2 * border_size)* subpixel_factor)))
+			{
+				continue;
+			}
 
 			// (1) determine the subpixel neighborhood in the old image
 			image_subpixel_window(&pyramid_old[LVL], &window_I, &vectors[new_p].pos, subpixel_factor, border_size);
@@ -174,10 +182,10 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 
 
 				// If the pixel is outside ROI, do not track it
-				if ( (((int32_t)vectors[new_p].pos.x  + vectors[new_p].flow_x) < 0)
-						|| ((new_point.x / subpixel_factor) > (pyramid_new[LVL].w - 2*border_size))
-						|| (((int32_t)vectors[new_p].pos.y  + vectors[new_p].flow_y) < 0)
-						|| ((new_point.y / subpixel_factor) > (pyramid_new[LVL].h - 2*border_size)) )
+				if ( (( (int32_t)vectors[new_p].pos.x  + vectors[new_p].flow_x) < 0)
+					|| ( new_point.x > ((pyramid_new[LVL].w - 1 - 2*border_size)*subpixel_factor))
+					|| (((int32_t)vectors[new_p].pos.y  + vectors[new_p].flow_y) < 0)
+					|| ( new_point.y > ((pyramid_new[LVL].h - 1 - 2*border_size)*subpixel_factor)) )
 				{
 					tracked = FALSE;
 					//printf("*New point outside ROI %d, %d; window size w %u h %u \n",

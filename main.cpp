@@ -40,7 +40,7 @@ int main()
 	vector<string> *image_filenames;
 	vector<string> *ground_truth_filenames;
 
-	string testset_dir = "/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSequence2";
+	string testset_dir = "/home/hrvoje/Desktop/Lucas Kanade algorithm/developing_LK/test_images/testSequence3";
 	image_filenames = listdir(testset_dir + "/images");
 	ground_truth_filenames = listdir(testset_dir + "/ground_truth");
 	string output_dir = testset_dir + "/output";
